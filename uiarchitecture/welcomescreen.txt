@@ -1,0 +1,15 @@
+Welcome Screen<View>
+|
+|--Middle<View>
+|    |
+|    |--Logo<Image>
+|    |
+|    |--Small description<Text>
+|
+|--Footer<View>
+     |
+     |--Button<TouchableOpacity>
+     |     |
+     |     |--Text<Text>
+     |
+     |--OnelineDescription<Text>
