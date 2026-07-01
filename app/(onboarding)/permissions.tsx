@@ -52,6 +52,11 @@ const PermissionsPage = () => {
                     <Text style={styles.infoText}>
                         You can change these anytime in Settings.
                     </Text>
+                    <View style={styles.footer}>
+                        <TouchableOpacity style={styles.button}>
+                            <Text style={styles.buttonText}>Continue</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </SafeAreaView>
@@ -141,6 +146,26 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: "#888",
         fontSize: 12,
+    },
+    footer: {
+        marginTop: "85%",
+        flex: 1,
+        justifyContent: "flex-end",
+        paddingBottom: 24
+    },
+    button: {
+        backgroundColor: "#0A1628",
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 52,
+        width: '100%',
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16
     }
 });
-//
