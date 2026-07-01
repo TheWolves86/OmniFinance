@@ -1,14 +1,13 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Images } from "@/src/lib/image";
+import { useRouter } from "expo-router";
 
 export default function WelcomeScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
-        {/* ======================
-            Middle Section
-           ====================== */}
         <View style={styles.middle}>
           <Image
             source={Images.logo}
@@ -20,11 +19,9 @@ export default function WelcomeScreen() {
           </Text>
         </View>
 
-        {/* ======================
-            Footer Section
-           ====================== */}
         <View style={styles.footer}>
           <TouchableOpacity
+            onPress={() => router.push("/permissions")}
             activeOpacity={0.8}
             style={styles.button}
           >
@@ -92,3 +89,4 @@ const styles = StyleSheet.create({
     color: "#8B8B8B",
   },
 });
+//

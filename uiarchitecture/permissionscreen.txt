@@ -1,0 +1,40 @@
+Permission Screen<SafeAreaView>
+|
+|--Screen<View>
+    |
+    |---Header<View>
+    |      |
+    |      |--Title<Text>
+    |      |
+    |      |--Description<Text>
+    |
+    |---PermissionList<View>
+    |       |
+    |       |--CamerPermissionCard<View>
+    |       |     |
+    |       |     |--LeftSection<View>
+    |       |     |     |
+    |       |     |     |--IconContainer<View>
+    |       |     |     |      |
+    |       |     |     |      |--CameraIcon<Image>/<Text>
+    |       |     |     |
+    |       |     |     |--TextSection<View>
+    |       |     |           |-PermissionTitle<Text>
+    |       |     |           |-PermissionDescription<Text>
+    |       |     |
+    |       |     |--PermissionSwitch<Switch>
+    |       |
+    |       |--SMSPermissionCard<View>
+    |       |     |
+    |       |     |--LeftSection<View>
+    |       |     |     |
+    |       |     |     |--IconContainer<View>
+    |       |     |     |      |
+    |       |     |     |      |--SMSIcon<Image>/<Text>
+    |       |     |     |
+    |       |     |     |--TextSection<View>
+    |       |     |           |-PermissionTitle<Text>
+    |       |     |           |-PermissionDescription<Text>
+    |       |     |
+    |       |     |--PermissionSwitch<Switch>
+    
