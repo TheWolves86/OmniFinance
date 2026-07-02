@@ -1,0 +1,16 @@
+Gemini Screen<SafeAreaView>
+|
+|----Screen<View>
+       |
+       |---Header<View>
+       |       |
+       |       |--IconContainer<View>
+       |       |       |-Icon<Text>
+       |       |
+       |       |--Title<Text>
+       |       |--Description<Text>
+       |
+       |--InputCard<View>
+       |       |
+       |       |--InputLabel<Text>
+       |       |--InputContainer<View>
