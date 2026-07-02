@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            onPress={() => router.push("/permissions")}
+            onPress={() => router.push("/features")}
             activeOpacity={0.8}
             style={styles.button}
           >

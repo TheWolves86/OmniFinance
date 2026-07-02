@@ -1,0 +1,39 @@
+FeatureScreen<SafeAreaView>
+|
+|----Screen<View>
+       |
+       |---Header<View>
+       |       |
+       |       |--Title<Text>
+       |       |--Description<Text>
+       |
+       |---FeaturesContainer<View>
+       |       |
+       |       |--FeatureCard<View>
+       |       |       |
+       |       |       |--IconContainer<View>
+       |       |       |       |-Icon<Text>
+       |       |       |--Content<View>
+       |       |               |--FeatureTitle<Text>
+       |       |               |--FeatureDescription<Text>
+       |       |
+       |       |--FeatureCard<View>
+       |       |       |
+       |       |       |--IconContainer<View>
+       |       |       |       |-Icon<Text>
+       |       |       |--Content<View>
+       |       |               |--FeatureTitle<Text>
+       |       |               |--FeatureDescription<Text>
+       |       |        
+       |       |--FeatureCard<View>
+       |       |       |
+       |       |       |--IconContainer<View>
+       |       |       |       |-Icon<Text>
+       |       |       |--Content<View>
+       |       |               |--FeatureTitle<Text>
+       |       |               |--FeatureDescription<Text>
+       |
+       |---Footer<View>
+               |
+               |--NextButton<TouchableOpacity>
+                     |-ButtonText<Text>
