@@ -8,6 +8,7 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
+        {/* Logo and Tagline */}
         <View style={styles.middle}>
           <Image
             source={Images.logo}
@@ -18,7 +19,7 @@ export default function WelcomeScreen() {
             Your money. Your rules.
           </Text>
         </View>
-
+        {/* Button and footer text */}
         <View style={styles.footer}>
           <TouchableOpacity
             onPress={() => router.push("/features")}
@@ -89,4 +90,3 @@ const styles = StyleSheet.create({
     color: "#8B8B8B",
   },
 });
-//

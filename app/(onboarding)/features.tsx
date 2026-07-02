@@ -3,16 +3,19 @@ import React from 'react'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const features = () => {
+const Features = () => {
   const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>What OmniFinance does</Text>
           <Text style={styles.headerDescription}>Everything your wallet needs. Nothing it doesn't.</Text>
         </View>
+        {/* FeatureCards */}
         <View style={styles.featureContainer}>
+          {/* Track Ruppee card */}
           <View style={styles.featureCard}>
             <View style={styles.leftSection}>
               <View style={styles.iconCircle}>
@@ -24,6 +27,7 @@ const features = () => {
               </View>
             </View>
           </View>
+          {/* Ai budget coach card */}
           <View style={styles.featureCard}>
             <View style={styles.leftSection}>
               <View style={styles.iconCircle}>
@@ -35,6 +39,7 @@ const features = () => {
               </View>
             </View>
           </View>
+          {/* Receipt and SMS scanner card */}
           <View style={styles.featureCard}>
             <View style={styles.leftSection}>
               <View style={styles.iconCircle}>
@@ -47,6 +52,7 @@ const features = () => {
             </View>
           </View>
         </View>
+        {/* Footer and button */}
         <View style={styles.footer}>
           <TouchableOpacity style={styles.footerButton} onPress={() => router.push("/permissions")}>
             <Text style={styles.footerButtonText}>Next</Text>
@@ -57,7 +63,7 @@ const features = () => {
   )
 }
 
-export default features
+export default Features
 
 const styles = StyleSheet.create({
   safeArea: {

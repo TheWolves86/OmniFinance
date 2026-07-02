@@ -5,18 +5,22 @@ import { useRouter } from 'expo-router'
 import { Camera } from 'expo-camera'
 
 const PermissionsPage = () => {
+    // Stores if the permission are off
     const [cameraEnabled, setCameraEnabled] = useState(false);
     const [smsEnabled, setSmsEnabled] = useState(false);
     const router = useRouter();
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.screen}>
+                {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>A few permissions needed</Text>
                     <Text style={styles.headerDescription}>OmniFinance works fully offline. Permissions stay on your device.</Text>
                 </View>
                 <View style={styles.middleView}>
+                    {/* Permission Cards */}
                     <View style={styles.permissionContainer}>
+                        {/* Camera Permission */}
                         <View style={styles.permissionCard}>
                             <View style={styles.leftSection}>
                                 <View style={styles.iconCircle}>
@@ -39,6 +43,7 @@ const PermissionsPage = () => {
                                 }}
                             />
                         </View>
+                        {/* SMS Permission */}
                         <View style={styles.permissionCard}>
                             <View style={styles.leftSection}>
                                 <View style={styles.iconcircleDark}>
@@ -58,9 +63,11 @@ const PermissionsPage = () => {
                             onValueChange={setSmsEnabled}/>
                         </View>
                     </View>
+                    {/* Small info text */}
                     <Text style={styles.infoText}>
                         You can change these anytime in Settings.
                     </Text>
+                    {/* footer and continue button */}
                     <View style={styles.footer}>
                         <TouchableOpacity style={styles.button} onPress={() => router.push("/gemini")}>
                             <Text style={styles.buttonText}>Continue</Text>
