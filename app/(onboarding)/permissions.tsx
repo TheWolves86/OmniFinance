@@ -2,10 +2,12 @@ import { StyleSheet, Text, View, TouchableOpacity, Switch} from 'react-native'
 import React, { useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
+import { Camera } from 'expo-camera'
 
 const PermissionsPage = () => {
     const [cameraEnabled, setCameraEnabled] = useState(false);
-        const [smsEnabled, setSmsEnabled] = useState(false);
+    const [smsEnabled, setSmsEnabled] = useState(false);
+    const router = useRouter();
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.screen}>
@@ -27,7 +29,14 @@ const PermissionsPage = () => {
                             </View>
                             <Switch
                                 value={cameraEnabled}
-                                onValueChange={setCameraEnabled}
+                                onValueChange={async (value) => {
+                                    if (!value) {
+                                        setCameraEnabled(false);
+                                        return;
+                                    }
+                                    const { status } = await Camera.requestCameraPermissionsAsync();
+                                    setCameraEnabled(status === 'granted');
+                                }}
                             />
                         </View>
                         <View style={styles.permissionCard}>
@@ -53,7 +62,7 @@ const PermissionsPage = () => {
                         You can change these anytime in Settings.
                     </Text>
                     <View style={styles.footer}>
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity style={styles.button} onPress={() => router.push("/gemini")}>
                             <Text style={styles.buttonText}>Continue</Text>
                         </TouchableOpacity>
                     </View>
@@ -169,3 +178,5 @@ const styles = StyleSheet.create({
         fontSize: 16
     }
 });
+//
+//
