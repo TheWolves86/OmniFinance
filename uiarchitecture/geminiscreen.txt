@@ -1,16 +1,39 @@
-Gemini Screen<SafeAreaView>
-|
+GeminiScreen<SafeAreaView>
+│
 |----Screen<View>
-       |
-       |---Header<View>
-       |       |
-       |       |--IconContainer<View>
-       |       |       |-Icon<Text>
-       |       |
-       |       |--Title<Text>
-       |       |--Description<Text>
-       |
-       |--InputCard<View>
-       |       |
-       |       |--InputLabel<Text>
-       |       |--InputContainer<View>
+    │
+    |---Header<View>
+    │   │
+    │   |--IconContainer<View>
+    │   │   |-Icon<Text>
+    │   │
+    │   |--Title<Text>
+    │   |--Description<Text>
+    │
+    |---InputCard<View>
+    │   │
+    │   |--InputLabel<Text>
+    │   │
+    │   |--InputContainer<View>
+    │   │   │
+    │   │   |--ApiKeyInput<TextInput>
+    │   │   |--EyeButton<TouchableOpacity>
+    │   │       |--EyeIcon<Text>
+    │   │
+    │   |--PrivacyInfo<View>
+    │   │   │
+    │   │   |-InfoIcon<Text>
+    │   │   |-PrivacyText<Text>
+    │   │
+    │   |--AiStudioLink<TouchableOpacity>
+    │       |--LinkText<Text>
+    │
+    |---Footer<View>
+    │   │
+    │   |--SaveButton<TouchableOpacity>
+    │   │   |--ButtonText<Text>
+    │   │
+    │   |--SkipButton<TouchableOpacity>
+    │   │   |--ButtonText<Text>
+    │   │
+    │   |--FooterNote<Text>
