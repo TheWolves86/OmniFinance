@@ -9,7 +9,7 @@ const Gemini = () => {
   const [ hideKey, setHideKey ] = useState(true)
   const router = useRouter()
 
-  const opneAiStudio = async () => {
+  const openAiStudio = async () => {
     await Linking.openURL("https://aistudio.google.com/app/apikey")
   }
 
@@ -48,7 +48,48 @@ const Gemini = () => {
             <Text>{hideKey ? "👁️" : "🙈"}</Text>
           </TouchableOpacity>
         </View>
-        
+        <View style={styles.privacyInfo}>
+          <Text>🔒</Text>
+
+          <Text style={styles.privacyText}>
+            Stored locally. Never leaves your device.
+          </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.aiStudioLink}
+            onPress={openAiStudio}
+          >
+            <Text style={styles.linkText}>
+              Get a free key at aistudio.google.com →
+            </Text>
+          </TouchableOpacity>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSave}
+          >
+            <Text style={styles.saveButtonText}>
+              Save & Continue
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.skipButton}
+            onPress={() => router.replace("/(tabs)")}
+          >
+            <Text style={styles.skipButtonText}>
+              Skip for now
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={styles.footerNote}>
+            AI features will be unavailable until a key is added.
+          </Text>
+        </View>
+
       </View>
     </SafeAreaView>
   )
