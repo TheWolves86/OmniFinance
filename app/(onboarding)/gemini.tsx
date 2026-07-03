@@ -44,8 +44,11 @@ const Gemini = () => {
               autoCapitalize="none"
               autoCorrect={false}
             />
+          <TouchableOpacity style={styles.eyeButton} onPress={() => setHideKey(!hideKey)}>
+            <Text>{hideKey ? "👁️" : "🙈"}</Text>
+          </TouchableOpacity>
         </View>
-
+        
       </View>
     </SafeAreaView>
   )
