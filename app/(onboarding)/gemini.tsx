@@ -8,14 +8,11 @@ const Gemini = () => {
   const [ apiKey, setApiKey ] = useState("")
   const [ hideKey, setHideKey ] = useState(true)
   const router = useRouter()
-
   const openAiStudio = async () => {
     await Linking.openURL("https://aistudio.google.com/app/apikey")
   }
-
   const handleSave = () => {
     console.log(`API key: ${apiKey}`)
-
     router.replace("/(tabs)")
   }
 
@@ -26,14 +23,11 @@ const Gemini = () => {
           <View style={styles.iconContainer}>
             <Text style={{ fontSize: 24 }}>✨</Text>
           </View>
-
           <Text style={styles.title}>Connect your AI</Text>
-
           <Text style={styles.description}>
             OmniFinance is open source. Bring your own free api key to unlock AI features
           </Text>
         </View>
-
         <View style={styles.inputCard}>
           <TextInput
               style={styles.input}
@@ -50,12 +44,10 @@ const Gemini = () => {
         </View>
         <View style={styles.privacyInfo}>
           <Text>🔒</Text>
-
           <Text style={styles.privacyText}>
             Stored locally. Never leaves your device.
           </Text>
           </View>
-
           <TouchableOpacity
             style={styles.aiStudioLink}
             onPress={openAiStudio}
@@ -64,8 +56,6 @@ const Gemini = () => {
               Get a free key at aistudio.google.com →
             </Text>
           </TouchableOpacity>
-
-        {/* Footer */}
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.saveButton}
@@ -75,7 +65,6 @@ const Gemini = () => {
               Save & Continue
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.skipButton}
             onPress={() => router.replace("/(tabs)")}
@@ -84,12 +73,10 @@ const Gemini = () => {
               Skip for now
             </Text>
           </TouchableOpacity>
-
           <Text style={styles.footerNote}>
             AI features will be unavailable until a key is added.
           </Text>
         </View>
-
       </View>
     </SafeAreaView>
   )
