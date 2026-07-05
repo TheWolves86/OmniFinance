@@ -17,7 +17,7 @@ const Gemini = () => {
     if (apiKey.length === 0) {
       alert("Please enter your API key.")
     } else {
-      console.log(`API key: ${apiKey}`)
+      console.log(`API key saved`)
       router.replace("/(tabs)")
     }
   }
@@ -31,12 +31,12 @@ const Gemini = () => {
           </View>
           <Text style={styles.title}>Connect your AI</Text>
           <Text style={styles.description}>
-            OmniFinance is open source. Bring your own free Gemini API key to unlock AI features.
+            OmniFinance is open source. Bring your own AI API key to unlock AI features.
           </Text>
         </View>
 
         <View style={styles.inputCard}>
-          <Text style={styles.inputLabel}>Gemini API Key</Text>
+          <Text style={styles.inputLabel}>API Key</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
