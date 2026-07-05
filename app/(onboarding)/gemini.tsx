@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import SafeAreaView from 'react-native-safe-area-view'
 import * as Linking from 'expo-linking'
+import { saveItem } from '../../src/lib/storage'
+import { STORAGE_KEYS } from '../../src/constants/storageKeys'
 
 const Gemini = () => {
   const [apiKey, setApiKey] = useState("")
@@ -13,13 +15,22 @@ const Gemini = () => {
     await Linking.openURL("https://aistudio.google.com/app/apikey")
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (apiKey.length === 0) {
       alert("Please enter your API key.")
     } else {
       console.log(`API key saved`)
+      await saveItem(STORAGE_KEYS.API_KEY, apiKey);
+      await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
+      await saveItem(STORAGE_KEYS.ONBOARDING, "true");
+
       router.replace("/(tabs)")
     }
+  }
+
+  const handleSkip = async () => {
+    await saveItem(STORAGE_KEYS.ONBOARDING, "true");
+    router.replace("/(tabs)")
   }
 
   return (
@@ -70,7 +81,7 @@ const Gemini = () => {
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save & Continue</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.skipButton} onPress={() => router.replace("/(tabs)")}>
+          <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
             <Text style={styles.skipButtonText}>Skip for now</Text>
           </TouchableOpacity>
           <Text style={styles.footerNote}>
