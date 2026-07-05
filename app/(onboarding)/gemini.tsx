@@ -5,15 +5,21 @@ import SafeAreaView from 'react-native-safe-area-view'
 import * as Linking from 'expo-linking'
 
 const Gemini = () => {
-  const [ apiKey, setApiKey ] = useState("")
-  const [ hideKey, setHideKey ] = useState(true)
+  const [apiKey, setApiKey] = useState("")
+  const [hideKey, setHideKey] = useState(true)
   const router = useRouter()
+
   const openAiStudio = async () => {
     await Linking.openURL("https://aistudio.google.com/app/apikey")
   }
+
   const handleSave = () => {
-    console.log(`API key: ${apiKey}`)
-    router.replace("/(tabs)")
+    if (apiKey.length === 0) {
+      alert("Please enter your API key.")
+    } else {
+      console.log(`API key: ${apiKey}`)
+      router.replace("/(tabs)")
+    }
   }
 
   return (
@@ -25,11 +31,14 @@ const Gemini = () => {
           </View>
           <Text style={styles.title}>Connect your AI</Text>
           <Text style={styles.description}>
-            OmniFinance is open source. Bring your own free api key to unlock AI features
+            OmniFinance is open source. Bring your own free Gemini API key to unlock AI features.
           </Text>
         </View>
+
         <View style={styles.inputCard}>
-          <TextInput
+          <Text style={styles.inputLabel}>Gemini API Key</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
               style={styles.input}
               placeholder="AIza..."
               value={apiKey}
@@ -38,40 +47,31 @@ const Gemini = () => {
               autoCapitalize="none"
               autoCorrect={false}
             />
-          <TouchableOpacity style={styles.eyeButton} onPress={() => setHideKey(!hideKey)}>
-            <Text>{hideKey ? "👁️" : "🙈"}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.privacyInfo}>
-          <Text>🔒</Text>
-          <Text style={styles.privacyText}>
-            Stored locally. Never leaves your device.
-          </Text>
+            <TouchableOpacity style={styles.eyeButton} onPress={() => setHideKey(!hideKey)}>
+              <Text>{hideKey ? "👁️" : "🙈"}</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.aiStudioLink}
-            onPress={openAiStudio}
-          >
+
+          <View style={styles.privacyInfo}>
+            <Text style={{ fontSize: 12 }}>🔒</Text>
+            <Text style={styles.privacyText}>
+              Stored locally. Never leaves your device.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.aiStudioLink} onPress={openAiStudio}>
             <Text style={styles.linkText}>
               Get a free key at aistudio.google.com →
             </Text>
           </TouchableOpacity>
+        </View>
+
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
-            <Text style={styles.saveButtonText}>
-              Save & Continue
-            </Text>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save & Continue</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={() => router.replace("/(tabs)")}
-          >
-            <Text style={styles.skipButtonText}>
-              Skip for now
-            </Text>
+          <TouchableOpacity style={styles.skipButton} onPress={() => router.replace("/(tabs)")}>
+            <Text style={styles.skipButtonText}>Skip for now</Text>
           </TouchableOpacity>
           <Text style={styles.footerNote}>
             AI features will be unavailable until a key is added.
@@ -81,6 +81,7 @@ const Gemini = () => {
     </SafeAreaView>
   )
 };
+
 export default Gemini
 
 const styles = StyleSheet.create({
@@ -124,7 +125,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#EFEFEF",
-    padding: 18
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   inputLabel: {
     fontSize: 13,
@@ -139,20 +145,22 @@ const styles = StyleSheet.create({
     borderColor: "#E5E5E5",
     borderRadius: 12,
     paddingHorizontal: 14,
-    height: 50
+    height: 50, 
   },
   input: {
     flex: 1,
     fontSize: 14,
-    color: "#111"
+    color: "#111",
+    height: "100%", 
   },
   eyeButton: {
-    paddingLeft: 10
+    paddingLeft: 10,
+    paddingVertical: 10, 
   },
   privacyInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 14
+    marginTop: 16
   },
   privacyText: {
     marginLeft: 6,
@@ -161,12 +169,16 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   aiStudioLink: {
-    marginTop: 18
+    marginTop: 18,
+    borderBottomWidth: 1, 
+    borderBottomColor: "#FFD54F", 
+    alignSelf: "flex-start",
+    paddingBottom: 2
   },
   linkText: {
     fontSize: 13,
     color: "#222",
-    fontWeight: "600"
+    fontWeight: "700"
   },
   footer: {
     marginTop: "auto",
@@ -203,4 +215,3 @@ const styles = StyleSheet.create({
     color: "#999"
   }
 });
-//
