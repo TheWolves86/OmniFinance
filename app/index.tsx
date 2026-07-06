@@ -41,6 +41,7 @@ export default function Index() {
     return <Redirect href="/(tabs)" />;
   }
 
-  // Otherwise show onboarding
+  
   return <Redirect href="/(onboarding)/welcome" />;
 }
+//
