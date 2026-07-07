@@ -3,6 +3,7 @@ import { Transactions } from "../schema";
 import { randomUUID } from 'expo-crypto';
 import { eq, desc} from "drizzle-orm"
 
+//types for creating a transaction
 type CreateTransaction = {
     title: string;
     amount: number;
@@ -16,6 +17,7 @@ type CreateTransaction = {
     transactionDate: number;
 }
 
+//the function to create a transaction
 export async function createTransaction(data: CreateTransaction){
     const now = Date.now();
     await db.insert(Transactions).values({
@@ -35,6 +37,7 @@ export async function createTransaction(data: CreateTransaction){
     })
 };
 
+//the type for updating a transaction
 type UpdateTransaction = {
     title: string;
     amount: number;
@@ -48,6 +51,7 @@ type UpdateTransaction = {
     transactionDate: number
 }
 
+//function to get a transaction data by id
 export async function getTransactionById(id: string){
     const result = await db
         .select()
@@ -56,6 +60,7 @@ export async function getTransactionById(id: string){
     return result[0] ?? null;
 }
 
+//the function to get all transactions
 export async function getAllTransaction(){
     const result = await db
         .select()
@@ -64,6 +69,7 @@ export async function getAllTransaction(){
     return result;
 }
 
+//the function to update a transaction
 export async function updateTransaction(id: string, data: UpdateTransaction){
     await db
         .update(Transactions)
@@ -82,3 +88,11 @@ export async function updateTransaction(id: string, data: UpdateTransaction){
             })
         .where(eq(Transactions.id, id));
 };
+
+//the function to delete a transaction
+export async function deleteTransaction(id: string){
+    await db
+        .delete(Transactions)
+        .where(eq(Transactions.id, id));
+};
+//
