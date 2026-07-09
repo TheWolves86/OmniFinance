@@ -21,7 +21,6 @@ export default function Index() {
     checkOnboarding();
   }, []);
 
-  // Wait until we check AsyncStorage
   if (loading) {
     return (
       <View
@@ -36,7 +35,6 @@ export default function Index() {
     );
   }
 
-  // Go to tabs if onboarding is already done
   if (onboardingDone) {
     return <Redirect href="/(tabs)" />;
   }
