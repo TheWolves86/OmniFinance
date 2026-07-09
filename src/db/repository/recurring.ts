@@ -69,6 +69,7 @@ export async function deleteRecurring(id: string) {
     .where(eq(recurringTransaction.id, id));
 }
 
+//function to get due recurring transactions
 export async function getDueRecurringTransactions() {
   const now = Date.now();
 
