@@ -6,3 +6,7 @@ export * from "./loan";
 export * from "./recurring";
 export * from "./goal";
 export * from "./settings";
+export * from "./portfolio";
+export * from "./bill";
+export * from "./transfer";
+export * from "./insurance";
