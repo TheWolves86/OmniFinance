@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { initializeDatabase } from "@/src/db/init";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -17,10 +18,13 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack
+    <BottomSheetModalProvider>
+      <Stack
       screenOptions={{
         headerShown: false,
       }}
     />
+    </BottomSheetModalProvider>
+    
   );
-}
+}//
