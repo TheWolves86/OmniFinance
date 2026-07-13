@@ -36,7 +36,7 @@ export default function Index() {
   }
 
   if (onboardingDone) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/(tabs)/dashboard" />;
   }
 
   

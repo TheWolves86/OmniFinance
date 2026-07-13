@@ -1,39 +1,61 @@
 import React from "react";
-import { View, Text, Pressable, Platform, StyleSheet} from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
+import { View, Text, Pressable, Platform, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const NAVY = "#0B1D3A";
-const NAVY_MUTED = "#8A93A6"
-const WHITE = "#FFFFFF"
+const NAVY_MUTED = "#8A93A6";
+const WHITE = "#FFFFFF";
+const FAB_SIZE = 56;
+const FAB_OFFSET = 22;
+
+type TabRoute = {
+  key: string;
+  name: string;
+};
+
+type TabDescriptor = {
+  options?: {
+    title?: string;
+  };
+};
+
+type CustomTabBarProps = {
+  state: {
+    index: number;
+    routes: TabRoute[];
+  };
+  descriptors: Record<string, TabDescriptor>;
+  navigation: {
+    emit: (event: {
+      type: string;
+      target: string;
+      canPreventDefault: boolean;
+    }) => { defaultPrevented?: boolean };
+    navigate: (name: string) => void;
+  };
+};
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-    dashboard: "grid-outline",
-    acitivity: "receipt-outline",
-    budgets: "wallet-outline",
-    goals: "flag-outline",
-    reports: "bar-chart-outline"
+  dashboard: "grid-outline",
+  activity: "receipt-outline",
+  goals: "trophy-outline",
+  reports: "bar-chart-outline",
 };
 
 const ICONS_FOCUSED: Record<string, keyof typeof Ionicons.glyphMap> = {
-    dashboard: "grid",
-    activity: "receipt",
-    budgets: "wallet",
-    goals: "flag",
-    reports: "bar-chart"
+  dashboard: "grid",
+  activity: "receipt",
+  goals: "trophy",
+  reports: "bar-chart",
 };
 
-export default function CustomTabBar({
-    state,
-    descriptors,
-    navigation,
-}: BottomTabBarProps) {
+export default function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
-    const FAB_INDEX = 2;
+
 
     const handleAddPress = () => {
         console.log("Add Transaction")
@@ -42,7 +64,7 @@ export default function CustomTabBar({
     return (
         <View style={[styles.wrapper, { paddingBottom: insets.bottom || 8}]}>
             <View style={styles.barBackground}>
-                {state.routes.map((route, index) => {
+                {state.routes.map((route: { key: string; name: string }, index: number) => {
                 const { options } = descriptors[route.key];
                 const isFocused = state.index === index;
                 const iconName = isFocused
@@ -104,53 +126,52 @@ export default function CustomTabBar({
 }
 
 const styles = StyleSheet.create({
-    wrapper: {
-        position: "relative"
-    },
-    barBackground: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: WHITE,
-        height: 58,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: "#E5E7EB"
-    },
-    tabItem: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2
-    },
-    label: {
-        fontSize: 10,
-        fontWeight: "500"
-    },
-    fabSpacer: {
-        width: 56
-    },
-    fab: {
-        position: "absolute",
-        alignSelf: "center",
-        top: -22,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: NAVY,
-        alignItems: "center",
-        justifyContent: "center",
-        ...Platform.select({
-            ios: {
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.18,
-                shadowRadius: 8
-            },
-            android: {
-                elevation: 4
-            }
-        })
-    }
-})
-//i somehow see it was beautiful
-//the things that i never could
+  wrapper: {
+    position: "relative",
+    backgroundColor: WHITE,
+  },
+  barBackground: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    backgroundColor: WHITE,
+    height: 64,
+    paddingHorizontal: FAB_SIZE / 2 + 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#E5E7EB",
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 0,
+    paddingVertical: 6,
+    gap: 2,
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: "500",
+  },
+  fab: {
+    position: "absolute",
+    alignSelf: "center",
+    top: -FAB_OFFSET,
+    width: FAB_SIZE,
+    height: FAB_SIZE,
+    borderRadius: FAB_SIZE / 2,
+    backgroundColor: NAVY,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.18,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+});

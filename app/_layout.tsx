@@ -1,30 +1,23 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
-import { initializeDatabase } from "@/src/db/init";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native";
 
 export default function RootLayout() {
-  useEffect(() => {
-    const loadDatabase = async () => {
-      try {
-        await initializeDatabase();
-        console.log("Database initialized");
-      } catch (error) {
-        console.log("Database error:", error);
-      }
-    };
-
-    loadDatabase();
-  }, []);
-
   return (
-    <BottomSheetModalProvider>
-      <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
-    </BottomSheetModalProvider>
-    
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={styles.container}>
+        <BottomSheetModalProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
-}//
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
