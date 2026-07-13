@@ -36,14 +36,71 @@ export default function CustomTabBar({
     const FAB_INDEX = 2;
 
     const handleAddPress = () => {
-        router.push("")
+        console.log("Add Transaction")
     }
 
     return (
         <View style={[styles.wrapper, { paddingBottom: insets.bottom || 8}]}>
+            <View style={styles.barBackground}>
+                {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const isFocused = state.index === index;
+                const iconName = isFocused
+                    ? ICONS_FOCUSED[route.name]
+                    : ICONS[route.name];
 
+                const onPress = () => {
+                const event = navigation.emit({
+                type: "tabPress",
+                target: route.key,
+                canPreventDefault: true,
+                });
+
+                if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+                }
+            };
+             const tabButton = (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              style={styles.tabItem}
+              hitSlop={8}
+            >
+              <Ionicons
+                name={iconName}
+                size={22}
+                color={isFocused ? NAVY : NAVY_MUTED}
+              />
+              <Text
+                style={[
+                  styles.label,
+                  { color: isFocused ? NAVY : NAVY_MUTED },
+                ]}
+              >
+                {options.title ?? route.name}
+              </Text>
+            </Pressable>
+          );
+
+          if (index === FAB_INDEX) {
+            return (
+              <React.Fragment key={`frag-${route.key}`}>
+                <View style={styles.fabSpacer} />
+                {tabButton}
+              </React.Fragment>
+            );
+          }
+
+          return tabButton;
+        })}
         </View>
-    )
+        <Pressable onPress={handleAddPress} style={styles.fab} hitSlop={10}>
+            <Ionicons name="add" size={28} color={WHITE} />
+        </Pressable>
+    </View>
+    
+    ) 
 }
 
 const styles = StyleSheet.create({
@@ -95,3 +152,5 @@ const styles = StyleSheet.create({
         })
     }
 })
+//i somehow see it was beautiful
+//the things that i never could
