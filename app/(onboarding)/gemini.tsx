@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -12,25 +12,40 @@ const Gemini = () => {
   const router = useRouter()
 
   const openAiStudio = async () => {
-    await Linking.openURL("https://aistudio.google.com/app/apikey")
+    try {
+      await Linking.openURL("https://aistudio.google.com/app/apikey")
+    } catch (error) {
+      console.error("Error opening link:", error);
+      Alert.alert("Error", "Could not open the link.");
+    }
   }
 
   const handleSave = async () => {
     if (apiKey.length === 0) {
       alert("Please enter your API key.")
     } else {
-      console.log(`API key saved`)
-      await saveItem(STORAGE_KEYS.API_KEY, apiKey);
-      await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
-      await saveItem(STORAGE_KEYS.ONBOARDING, "true");
+      try {
+        console.log(`API key saved`)
+        await saveItem(STORAGE_KEYS.API_KEY, apiKey);
+        await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
+        await saveItem(STORAGE_KEYS.ONBOARDING, "true");
 
-      router.replace("/(tabs)")
+        router.replace("/(tabs)")
+      } catch (error) {
+        console.error("Error saving API key:", error);
+        Alert.alert("Error", "Could not save the API key.");
+      }
     }
   }
 
   const handleSkip = async () => {
-    await saveItem(STORAGE_KEYS.ONBOARDING, "true");
-    router.replace("/(tabs)")
+    try {
+      await saveItem(STORAGE_KEYS.ONBOARDING, "true");
+      router.replace("/(tabs)")
+    } catch (error) {
+      console.error("Error skipping:", error);
+      Alert.alert("Error", "Could not proceed.");
+    }
   }
 
   return (
@@ -226,4 +241,3 @@ const styles = StyleSheet.create({
     color: "#999"
   }
 });
-//

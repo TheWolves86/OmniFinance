@@ -9,6 +9,7 @@ const NAVY_MUTED = "#8A93A6";
 const WHITE = "#FFFFFF";
 const FAB_SIZE = 56;
 const FAB_OFFSET = 22;
+const FAB_INDEX = 2; // Assuming the FAB is usually in the middle of a 4-5 item tab bar
 
 type TabRoute = {
   key: string;
@@ -100,7 +101,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
                   { color: isFocused ? NAVY : NAVY_MUTED },
                 ]}
               >
-                {options.title ?? route.name}
+                {options?.title ?? route.name}
               </Text>
             </Pressable>
           );
@@ -151,6 +152,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontWeight: "500",
+  },
+  fabSpacer: {
+    width: FAB_SIZE,
   },
   fab: {
     position: "absolute",
