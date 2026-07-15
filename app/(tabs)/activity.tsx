@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const ai = () => {
+const Activity = () => {
   return (
     <View>
       <Text>ai</Text>
@@ -9,6 +9,6 @@ const ai = () => {
   )
 }
 
-export default ai
+export default Activity
 
 const styles = StyleSheet.create({})
