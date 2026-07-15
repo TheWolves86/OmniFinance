@@ -1,3 +1,4 @@
+import { db } from "../db/index"
 import { createTransaction, getTransactionById, deleteTransaction, updateTransaction} from "@/src/db/repository/transaction"
 import { getAccountById, updateBalance } from "../db/repository/account"
 
@@ -18,102 +19,129 @@ type AddTransactionData = {
 export async function addTransaction(
     data: AddTransactionData
 ){
-    const account = await getAccountById(data.accountId);
+    try {
+        await db.transaction(async (tx) => {
+            const account = await getAccountById(data.accountId, tx);
 
-    if (!account) {
-        throw new Error("Account not found")
+            if (!account) {
+                throw new Error("Account not found")
+            }
+
+            let newBalance = account.balance
+
+            if (data.type === "income"){
+                newBalance += data.amount;
+            } else {
+                newBalance -= data.amount;
+            }
+
+            await createTransaction(data, tx);
+
+            await updateBalance(
+                account.id,
+                newBalance,
+                tx
+            );
+        });
+    } catch (error) {
+        console.error("Error adding transaction:", error);
+        throw error;
     }
-
-    let newBalance = account.balance
-
-    if (data.type === "income"){
-        newBalance += data.amount;
-    } else {
-        newBalance -= data.amount;
-    }
-
-    await createTransaction(data);
-
-    await updateBalance(
-        account.id,
-        newBalance
-    );
 }
 
 export async function deleteTransactionService(
   transactionId: string
 ) {
-  const transaction =
-    await getTransactionById(transactionId);
+    try {
+        await db.transaction(async (tx) => {
+            const transaction =
+                await getTransactionById(transactionId, tx);
 
-  if (!transaction) {
-    throw new Error("Transaction not found");
-  }
+            if (!transaction) {
+                throw new Error("Transaction not found");
+            }
 
-  const account = await getAccountById(
-    transaction.accountId
-  );
+            const account = await getAccountById(
+                transaction.accountId,
+                tx
+            );
 
-  if (!account) {
-    throw new Error("Account not found");
-  }
+            if (!account) {
+                throw new Error("Account not found");
+            }
 
-  let newBalance = account.balance;
+            let newBalance = account.balance;
 
-  if (transaction.type === "income") {
-    newBalance -= transaction.amount;
-  } else {
-    newBalance += transaction.amount;
-  }
+            if (transaction.type === "income") {
+                newBalance -= transaction.amount;
+            } else {
+                newBalance += transaction.amount;
+            }
 
-  await deleteTransaction(transactionId);
+            await deleteTransaction(transactionId, tx);
 
-  await updateBalance(
-    account.id,
-    newBalance
-  );
+            await updateBalance(
+                account.id,
+                newBalance,
+                tx
+            );
+        });
+    } catch (error) {
+        console.error("Error deleting transaction:", error);
+        throw error;
+    }
 }
 
 export async function editTransactionService(
   transactionId: string,
   data: AddTransactionData
 ) {
-  const oldTransaction =
-    await getTransactionById(transactionId);
+    try {
+        await db.transaction(async (tx) => {
+            const oldTransaction =
+                await getTransactionById(transactionId, tx);
 
-  if (!oldTransaction) {
-    throw new Error("Transaction not found");
-  }
+            if (!oldTransaction) {
+                throw new Error("Transaction not found");
+            }
 
-  const account = await getAccountById(
-    oldTransaction.accountId
-  );
+            const account = await getAccountById(
+                oldTransaction.accountId,
+                tx
+            );
 
-  if (!account) {
-    throw new Error("Account not found");
-  }
+            if (!account) {
+                throw new Error("Account not found");
+            }
 
-  let balance = account.balance;
+            let balance = account.balance;
 
-  if (oldTransaction.type === "income") {
-    balance -= oldTransaction.amount;
-  } else {
-    balance += oldTransaction.amount;
-  }
+            if (oldTransaction.type === "income") {
+                balance -= oldTransaction.amount;
+            } else {
+                balance += oldTransaction.amount;
+            }
 
-  if (data.type === "income") {
-    balance += data.amount;
-  } else {
-    balance -= data.amount;
-  }
+            if (data.type === "income") {
+                balance += data.amount;
+            } else {
+                balance -= data.amount;
+            }
 
-  await updateTransaction(
-    transactionId,
-    data
-  );
+            await updateTransaction(
+                transactionId,
+                data,
+                tx
+            );
 
-  await updateBalance(
-    account.id,
-    balance
-  );
+            await updateBalance(
+                account.id,
+                balance,
+                tx
+            );
+        });
+    } catch (error) {
+        console.error("Error editing transaction:", error);
+        throw error;
+    }
 }

@@ -21,12 +21,11 @@ const Gemini = () => {
   }
 
   const handleSave = async () => {
-    if (apiKey.length === 0) {
-      alert("Please enter your API key.")
+    if (apiKey.trim().length === 0) {
+      Alert.alert("Error", "Please enter your API key.");
     } else {
       try {
-        console.log(`API key saved`)
-        await saveItem(STORAGE_KEYS.API_KEY, apiKey);
+        await saveItem(STORAGE_KEYS.API_KEY, apiKey.trim());
         await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
         await saveItem(STORAGE_KEYS.ONBOARDING, "true");
 
@@ -53,7 +52,7 @@ const Gemini = () => {
       <View style={styles.screen}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Text style={{ fontSize: 24 }}>✨</Text>
+            <Text style={styles.iconText}>✨</Text>
           </View>
           <Text style={styles.title}>Connect your AI</Text>
           <Text style={styles.description}>
@@ -79,7 +78,7 @@ const Gemini = () => {
           </View>
 
           <View style={styles.privacyInfo}>
-            <Text style={{ fontSize: 12 }}>🔒</Text>
+            <Text style={styles.privacyIcon}>🔒</Text>
             <Text style={styles.privacyText}>
               Stored locally. Never leaves your device.
             </Text>
@@ -131,6 +130,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 18
+  },
+  iconText: {
+    fontSize: 24
   },
   title: {
     fontSize: 30,
@@ -187,6 +189,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 16
+  },
+  privacyIcon: {
+    fontSize: 12
   },
   privacyText: {
     marginLeft: 6,

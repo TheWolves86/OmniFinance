@@ -5,97 +5,132 @@ type CreateGoalData = Parameters<typeof createGoal>[0];
 export async function createGoalService(
   data: CreateGoalData
 ) {
-  await createGoal(data);
+    try {
+        await createGoal(data);
+    } catch (error) {
+        console.error("Error creating goal:", error);
+        throw error;
+    }
 }
 
 export async function addMoneyToGoal(
     goalId: string,
     amount: number
 ) {
-    const goal = await getGoalById(goalId);
+    try {
+        const goal = await getGoalById(goalId);
 
-    if (!goal) {
-        throw new Error("Goal not found")
+        if (!goal) {
+            throw new Error("Goal not found")
+        }
+
+        const newSavedAmount = goal.savedAmount + amount;
+
+        const isCompleted = newSavedAmount >= goal.targetAmount;
+
+        await updateGoal(goalId, {
+            title: goal.title,
+            description: goal.description ?? undefined,
+            targetAmount: goal.targetAmount,
+            savedAmount: newSavedAmount,
+            targetDate: goal.targetDate ?? undefined,
+            isCompleted
+        });
+    } catch (error) {
+        console.error("Error adding money to goal:", error);
+        throw error;
     }
-
-    const newSavedAmount = goal.savedAmount + amount;
-
-    const isCompleted = newSavedAmount >= goal.targetAmount;
-
-    await updateGoal(goalId, {
-        title: goal.title,
-        description: goal.description ?? undefined,
-        targetAmount: goal.targetAmount,
-        savedAmount: newSavedAmount,
-        targetDate: goal.targetDate ?? undefined,
-        isCompleted
-    });
 }
 
 export async function withdrawMoneyFromGoal(
     goalId: string,
     amount: number
 ) {
-    const goal = await getGoalById(goalId);
+    try {
+        const goal = await getGoalById(goalId);
 
-    if (!goal) {
-        throw new Error("Goal not found");
+        if (!goal) {
+            throw new Error("Goal not found");
+        }
+
+        const newSavedAmount = Math.max(
+            0,
+            goal.savedAmount - amount
+        );
+
+        await updateGoal(goalId, {
+            title: goal.title,
+            description: goal.description ?? undefined,
+            targetAmount: goal.targetAmount,
+            savedAmount: newSavedAmount,
+            targetDate: goal.targetDate ?? undefined,
+            isCompleted: false,
+        });
+    } catch (error) {
+        console.error("Error withdrawing money from goal:", error);
+        throw error;
     }
-
-    const newSavedAmount = Math.max(
-        0,
-        goal.savedAmount - amount
-    );
-
-    await updateGoal(goalId, {
-        title: goal.title,
-        description: goal.description ?? undefined,
-        targetAmount: goal.targetAmount,
-        savedAmount: newSavedAmount,
-        targetDate: goal.targetDate ?? undefined,
-        isCompleted: false,
-    });
 }
 
 export async function getGoalProgress(
     goalId: string
 ) {
-    const goal = await getGoalById(goalId);
+    try {
+        const goal = await getGoalById(goalId);
 
-    if (!goal) {
-        throw new Error("Goal not found");
+        if (!goal) {
+            throw new Error("Goal not found");
+        }
+
+        return (
+            (goal.savedAmount /
+                goal.targetAmount) *
+            100
+        );
+    } catch (error) {
+        console.error("Error getting goal progress:", error);
+        throw error;
     }
-
-    return (
-        (goal.savedAmount /
-            goal.targetAmount) *
-        100
-    );
 }
 
 export async function getCompletedGoals() {
-    const goals = await getAllGoals();
+    try {
+        const goals = await getAllGoals();
 
-    return goals.filter(
-        (goal) => goal.isCompleted
-    );
+        return goals.filter(
+            (goal) => goal.isCompleted
+        );
+    } catch (error) {
+        console.error("Error getting completed goals:", error);
+        throw error;
+    }
 }
 
 export async function getActiveGoals() {
-    const goals = await getAllGoals();
+    try {
+        const goals = await getAllGoals();
 
-    return goals.filter(
-        (goal) => !goal.isCompleted
-    );
+        return goals.filter(
+            (goal) => !goal.isCompleted
+        );
+    } catch (error) {
+        console.error("Error getting active goals:", error);
+        throw error;
+    }
 }
 
 export async function getTotalGoalSavings() {
-    const goals = await getAllGoals();
+    try {
+        const goals = await getAllGoals();
 
-    return goals.reduce(
-        (sum, goal) =>
-            sum + goal.savedAmount,
-        0
-    );
+        return goals.reduce(
+            (sum, goal) =>
+                sum + goal.savedAmount,
+            0
+        );
+    } catch (error) {
+        console.error("Error getting total goal savings:", error);
+        throw error;
+    }
 }
 //
