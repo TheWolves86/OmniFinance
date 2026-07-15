@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Switch} from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Switch, Alert} from 'react-native'
 import React, { useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -38,8 +38,14 @@ const PermissionsPage = () => {
                                         setCameraEnabled(false);
                                         return;
                                     }
-                                    const { status } = await Camera.requestCameraPermissionsAsync();
-                                    setCameraEnabled(status === 'granted');
+                                    try {
+                                        const { status } = await Camera.requestCameraPermissionsAsync();
+                                        setCameraEnabled(status === 'granted');
+                                    } catch (error) {
+                                        console.error("Error requesting camera permissions:", error);
+                                        Alert.alert("Error", "Could not request camera permissions.");
+                                        setCameraEnabled(false);
+                                    }
                                 }}
                             />
                         </View>

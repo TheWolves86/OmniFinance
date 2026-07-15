@@ -9,6 +9,7 @@ const NAVY_MUTED = "#8A93A6";
 const WHITE = "#FFFFFF";
 const FAB_SIZE = 56;
 const FAB_OFFSET = 22;
+const FAB_INDEX = 2; // Assuming the FAB is usually in the middle of a 4-5 item tab bar
 const FAB_INDEX = 2;
 
 type TabRoute = {
