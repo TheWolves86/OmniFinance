@@ -15,10 +15,10 @@ type createAccount = {
 };
 
 //function to create an account
-export async function createAccount(data: createAccount) {
+export async function createAccount(data: createAccount, tx: any = db) {
     const now = Date.now();
 
-    await db.insert(Accounts).values({
+    await tx.insert(Accounts).values({
         id: randomUUID(),
         name: data.name,
         type: data.type,
@@ -33,8 +33,8 @@ export async function createAccount(data: createAccount) {
 }
 
 //function to get an account by id
-export async function getAccountById(id: string) {
-    const result = await db
+export async function getAccountById(id: string, tx: any = db) {
+    const result = await tx
         .select()
         .from(Accounts)
         .where(eq(Accounts.id, id));
@@ -43,8 +43,8 @@ export async function getAccountById(id: string) {
 };
 
 //function to get all accounts
-export async function getAllAccounts() {
-  return await db.select().from(Accounts);
+export async function getAllAccounts(tx: any = db) {
+  return await tx.select().from(Accounts);
 }
 
 //type for updating an account
@@ -61,9 +61,10 @@ type UpdateAccount = {
 //function to update account details
 export async function updateAccount(
   id: string,
-  data: UpdateAccount
+  data: UpdateAccount,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Accounts)
     .set({
       name: data.name,
@@ -79,15 +80,15 @@ export async function updateAccount(
 };
 
 //function to delete an account
-export async function deleteAccount(id: string){
-    await db
+export async function deleteAccount(id: string, tx: any = db){
+    await tx
         .delete(Accounts)
         .where(eq(Accounts.id, id));
 }
 
 //function to update the account's balance
-export async function updateBalance(id: string,balance: number) {
-  await db
+export async function updateBalance(id: string,balance: number, tx: any = db) {
+  await tx
     .update(Accounts)
     .set({
       balance,

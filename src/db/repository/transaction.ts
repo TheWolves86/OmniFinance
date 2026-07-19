@@ -18,9 +18,9 @@ type CreateTransaction = {
 }
 
 //the function to create a transaction
-export async function createTransaction(data: CreateTransaction){
+export async function createTransaction(data: CreateTransaction, tx: any = db){
     const now = Date.now();
-    await db.insert(Transactions).values({
+    await tx.insert(Transactions).values({
         id: randomUUID(),
         title: data.title,
         amount: data.amount,
@@ -52,8 +52,8 @@ type UpdateTransaction = {
 }
 
 //function to get a transaction data by id
-export async function getTransactionById(id: string){
-    const result = await db
+export async function getTransactionById(id: string, tx: any = db){
+    const result = await tx
         .select()
         .from(Transactions)
         .where(eq(Transactions.id, id));
@@ -61,8 +61,8 @@ export async function getTransactionById(id: string){
 }
 
 //the function to get all transactions
-export async function getAllTransaction(){
-    const result = await db
+export async function getAllTransaction(tx: any = db){
+    const result = await tx
         .select()
         .from(Transactions)
         .orderBy(desc(Transactions.transactionDate));
@@ -70,8 +70,8 @@ export async function getAllTransaction(){
 }
 
 //the function to update a transaction
-export async function updateTransaction(id: string, data: UpdateTransaction){
-    await db
+export async function updateTransaction(id: string, data: UpdateTransaction, tx: any = db){
+    await tx
         .update(Transactions)
         .set({
             title: data.title,
@@ -90,8 +90,8 @@ export async function updateTransaction(id: string, data: UpdateTransaction){
 };
 
 //the function to delete a transaction
-export async function deleteTransaction(id: string){
-    await db
+export async function deleteTransaction(id: string, tx: any = db){
+    await tx
         .delete(Transactions)
         .where(eq(Transactions.id, id));
 };

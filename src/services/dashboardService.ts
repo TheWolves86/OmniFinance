@@ -13,78 +13,83 @@ export type DashboardData = {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
-    const accounts = await getAllAccounts();
-    const transactions = await getAllTransaction();
-    const goals = await getAllGoals();
-    const budgets = await getAllBudgets();
+    try {
+        const accounts = await getAllAccounts();
+        const transactions = await getAllTransaction();
+        const goals = await getAllGoals();
+        const budgets = await getAllBudgets();
 
-    const totalBalance = accounts.reduce(
-        (sum, account) => sum + account.balance,
-        0
-    );
-    const now = new Date();
-    const month = now.getMonth();
-    const year = now.getFullYear();
+        const totalBalance = accounts.reduce(
+            (sum: number, account: any) => sum + account.balance,
+            0
+        );
+        const now = new Date();
+        const month = now.getMonth();
+        const year = now.getFullYear();
 
-    const monthlyTransactions = transactions.filter(
-        (transaction) => {
-            const date = new Date(
-            transaction.transactionDate
+        const monthlyTransactions = transactions.filter(
+            (transaction: any) => {
+                const date = new Date(
+                transaction.transactionDate
+                );
+
+                return (
+                date.getMonth() === month &&
+                date.getFullYear() === year
+                );
+            }
+        );
+
+        const monthlyIncome =
+            monthlyTransactions
+                .filter((t: any) => t.type === "income")
+                .reduce(
+                (sum: number, t: any) => sum + t.amount,
+                0
             );
 
-            return (
-            date.getMonth() === month &&
-            date.getFullYear() === year
-            );
-        }
-    );
+        const monthlyExpense =
+            monthlyTransactions
+                .filter((t: any) => t.type === "expense")
+                .reduce(
+                    (sum: number, t: any) => sum + t.amount,
+                    0
+                );
 
-    const monthlyIncome =
-        monthlyTransactions
-            .filter((t) => t.type === "income")
-            .reduce(
-            (sum, t) => sum + t.amount,
+        const totalSaved = goals.reduce(
+            (sum: number, goal: any) => sum + goal.savedAmount,
             0
         );
 
-    const monthlyExpense =
-        monthlyTransactions
-            .filter((t) => t.type === "expense")
-            .reduce(
-                (sum, t) => sum + t.amount,
-                0
-            );
-    
-    const totalSaved = goals.reduce(
-        (sum, goal) => sum + goal.savedAmount,
-        0
-    );
+        const totalBudget = budgets.reduce(
+            (sum: number, budget: any) => sum + budget.limit,
+            0
+        )
 
-    const totalBudget = budgets.reduce(
-        (sum, budget) => sum + budget.limit,
-        0
-    )
+        const budgetUsed =
+            totalBudget === 0
+                ? 0
+                : (monthlyExpense / totalBudget) * 100;
 
-    const budgetUsed = 
-        totalBudget === 0
-            ? 0
-            : (monthlyExpense / totalBudget) * 100;
+        const recentTransactions =
+            transactions
+                .sort(
+                (a: any, b: any) =>
+                    b.transactionDate -
+                    a.transactionDate
+                )
+                .slice(0, 5);
 
-    const recentTransactions =
-        transactions
-            .sort(
-            (a, b) =>
-                b.transactionDate -
-                a.transactionDate
-            )
-            .slice(0, 5);
-
-    return {
-        totalBalance,
-        monthlyIncome,
-        monthlyExpense,
-        totalSaved,
-        budgetUsed,
-        recentTransactions,
-    };
+        return {
+            totalBalance,
+            monthlyIncome,
+            monthlyExpense,
+            totalSaved,
+            budgetUsed,
+            recentTransactions,
+        };
+    } catch (error) {
+        console.error("Error getting dashboard data:", error);
+        throw error;
+    }
 }
