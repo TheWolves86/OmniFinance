@@ -59,7 +59,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
 
 
     const handleAddPress = () => {
-        console.log("Add Transaction")
+        // TODO: Navigate to Add Transaction screen
     }
 
     return (

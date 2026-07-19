@@ -17,10 +17,10 @@ type CreateGoal = {
 type UpdateGoal = CreateGoal
 
 //function to create a goal
-export async function createGoal(data: CreateGoal) {
+export async function createGoal(data: CreateGoal, tx: any = db) {
     const now = Date.now()
 
-    await db.insert(Goals).values({
+    await tx.insert(Goals).values({
         id: randomUUID(),
         ...data,
         createdAt: now,
@@ -29,8 +29,8 @@ export async function createGoal(data: CreateGoal) {
 }
 
 //function to get a goal by id
-export async function getGoalById(id: string) {
-    const result = await db
+export async function getGoalById(id: string, tx: any = db) {
+    const result = await tx
         .select()
         .from(Goals)
         .where(eq(Goals.id, id));
@@ -38,13 +38,13 @@ export async function getGoalById(id: string) {
 }
 
 //function to get all goals
-export async function getAllGoals() {
-    return await db.select().from(Goals);
+export async function getAllGoals(tx: any = db) {
+    return await tx.select().from(Goals);
 }
 
 //function to update a goal
-export async function updateGoal(id: string, data: UpdateGoal) {
-    await db
+export async function updateGoal(id: string, data: UpdateGoal, tx: any = db) {
+    await tx
         .update(Goals)
         .set({
             ...data,
@@ -54,18 +54,18 @@ export async function updateGoal(id: string, data: UpdateGoal) {
 }
 
 //function to delete a goal
-export async function deleteGoal(id: string) {
-    await db
+export async function deleteGoal(id: string, tx: any = db) {
+    await tx
         .delete(Goals)
         .where(eq(Goals.id, id));
 }
 
 //function to add savings to complete the goal
-export async function addSavings(id: string, newAmount: number) {
-    const goal = await getGoalById(id);
+export async function addSavings(id: string, newAmount: number, tx: any = db) {
+    const goal = await getGoalById(id, tx);
     if (!goal) return;
     const totalSaved = goal.savedAmount + newAmount;
-    await db
+    await tx
         .update(Goals)
         .set({
         savedAmount: totalSaved,

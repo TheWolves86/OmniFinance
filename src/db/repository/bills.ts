@@ -18,10 +18,10 @@ type CreateBill = {
 type UpdateBill = CreateBill;
 
 //function to create a bill
-export async function createBill(data: CreateBill) {
+export async function createBill(data: CreateBill, tx: any = db) {
     const now = Date.now();
 
-    await db.insert(Bills).values({
+    await tx.insert(Bills).values({
         id: randomUUID(),
         title: data.title,
         amount: data.amount,
@@ -38,8 +38,8 @@ export async function createBill(data: CreateBill) {
 }
 
 //function to get a bill info by id
-export async function getBillById(id: string) {
-    const result = await db
+export async function getBillById(id: string, tx: any = db) {
+    const result = await tx
         .select()
         .from(Bills)
         .where(eq(Bills.id, id));
@@ -48,16 +48,17 @@ export async function getBillById(id: string) {
 }
 
 //functio to get all bills
-export async function getAllBills(){
-    return await db.select().from(Bills);
+export async function getAllBills(tx: any = db){
+    return await tx.select().from(Bills);
 }
 
 //function to update bill details/info
 export async function updateBill(
   id: string,
-  data: UpdateBill
+  data: UpdateBill,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Bills)
     .set({
       ...data,
@@ -67,15 +68,15 @@ export async function updateBill(
 };
 
 //function to delete a bill
-export async function deleteBill(id: string){
-    await db
+export async function deleteBill(id: string, tx: any = db){
+    await tx
         .delete(Bills)
         .where(eq(Bills.id, id));
 }
 
 //function to mark a bill as paid
-export async function markBillAsPaid(id: string) {
-  await db
+export async function markBillAsPaid(id: string, tx: any = db) {
+  await tx
     .update(Bills)
     .set({
       isPaid: true,

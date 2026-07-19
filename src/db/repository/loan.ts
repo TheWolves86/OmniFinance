@@ -17,10 +17,10 @@ type CreateLoan = {
 type UpdateLoan = CreateLoan
 
 //function to create a loan
-export async function createLoan(data: CreateLoan) {
+export async function createLoan(data: CreateLoan, tx: any = db) {
     const now = Date.now()
 
-    await db.insert(Loans).values({
+    await tx.insert(Loans).values({
         id: randomUUID(),
         title: data.title,
         principal: data.principal,
@@ -36,8 +36,8 @@ export async function createLoan(data: CreateLoan) {
 }
 
 //function to get a loan by id
-export async function getLoanById(id: string) {
-  const result = await db
+export async function getLoanById(id: string, tx: any = db) {
+  const result = await tx
     .select()
     .from(Loans)
     .where(eq(Loans.id, id));
@@ -46,17 +46,18 @@ export async function getLoanById(id: string) {
 }
 
 //function to get all loans
-export async function getAllLoans() {
-  return await db.select().from(Loans);
+export async function getAllLoans(tx: any = db) {
+  return await tx.select().from(Loans);
 }
 
 
 //function to update a loan
 export async function updateLoans(
   id: string,
-  data: UpdateLoan
+  data: UpdateLoan,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Loans)
     .set({
         title: data.title,
@@ -73,15 +74,15 @@ export async function updateLoans(
 }
 
 //function to delete a loan
-export async function deleteLoans(id: string) {
-  await db
+export async function deleteLoans(id: string, tx: any = db) {
+  await tx
     .delete(Loans)
     .where(eq(Loans.id, id));
 }
 
 //function to pay emi
-export async function payEmi(id: string) {
-  const loan = await getLoanById(id);
+export async function payEmi(id: string, tx: any = db) {
+  const loan = await getLoanById(id, tx);
 
   if (!loan) return;
 
@@ -92,7 +93,7 @@ export async function payEmi(id: string) {
   const paidMonths =
     loan.paidMonths + 1;
 
-  await db
+  await tx
     .update(Loans)
     .set({
       remainingAmount: Math.max(
