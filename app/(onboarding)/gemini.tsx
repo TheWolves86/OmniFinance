@@ -21,11 +21,11 @@ const Gemini = () => {
   }
 
   const handleSave = async () => {
-    if (apiKey.trim().length === 0) {
-      Alert.alert("Error", "Please enter your API key.");
+    if (apiKey.length === 0) {
+      Alert.alert("Error", "Please enter your API key.")
     } else {
       try {
-        await saveItem(STORAGE_KEYS.API_KEY, apiKey.trim());
+        await saveItem(STORAGE_KEYS.API_KEY, apiKey);
         await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
         await saveItem(STORAGE_KEYS.ONBOARDING, "true");
 
