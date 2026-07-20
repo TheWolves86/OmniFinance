@@ -84,7 +84,17 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
           />
         </View>
         <View style={styles.amountContainer}>
-          
+          <Text style={styles.amountLabel}>
+            AMOUNT
+          </Text>
+          <View style={styles.amountRow}>
+            <Text style={styles.rupee}>
+              ₹
+            </Text>
+            <Text style={styles.amount}>
+              {Number(amount).toLocaleString("en-IN")}
+            </Text>
+          </View>
         </View>
       </BottomSheetScrollView>
     </BottomSheetModal>
