@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, Pressable, Platform, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs/types";
 
 const NAVY = "#0B1D3A";
 const NAVY_MUTED = "#8A93A6";
@@ -10,33 +10,10 @@ const WHITE = "#FFFFFF";
 const FAB_SIZE = 56;
 const FAB_OFFSET = 22;
 const FAB_INDEX = 2; // Assuming the FAB is usually in the middle of a 4-5 item tab bar
-const FAB_INDEX = 2;
 
-type TabRoute = {
-  key: string;
-  name: string;
-};
 
-type TabDescriptor = {
-  options?: {
-    title?: string;
-  };
-};
-
-type CustomTabBarProps = {
-  state: {
-    index: number;
-    routes: TabRoute[];
-  };
-  descriptors: Record<string, TabDescriptor>;
-  navigation: {
-    emit: (event: {
-      type: string;
-      target: string;
-      canPreventDefault: boolean;
-    }) => { defaultPrevented?: boolean };
-    navigate: (name: string) => void;
-  };
+type CustomTabBarProps = BottomTabBarProps & {
+  onAddPress: () => void;
 };
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -53,15 +30,8 @@ const ICONS_FOCUSED: Record<string, keyof typeof Ionicons.glyphMap> = {
   reports: "bar-chart",
 };
 
-export default function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
-    const router = useRouter();
+export default function CustomTabBar({ state, descriptors, navigation, onAddPress}: CustomTabBarProps) {
     const insets = useSafeAreaInsets();
-
-
-
-    const handleAddPress = () => {
-        console.log("Add Transaction")
-    }
 
     return (
         <View style={[styles.wrapper, { paddingBottom: insets.bottom || 8}]}>
@@ -119,7 +89,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
           return tabButton;
         })}
         </View>
-        <Pressable onPress={handleAddPress} style={styles.fab} hitSlop={10}>
+        <Pressable onPress={onAddPress} style={styles.fab} hitSlop={10}>
             <Ionicons name="add" size={28} color={WHITE} />
         </Pressable>
     </View>

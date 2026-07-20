@@ -30,7 +30,7 @@ const Gemini = () => {
         await saveItem(STORAGE_KEYS.AI_PROVIDER, "gemini");
         await saveItem(STORAGE_KEYS.ONBOARDING, "true");
 
-        router.replace("/(tabs)")
+        router.replace("/(tabs)/dashboard")
       } catch (error) {
         console.error("Error saving API key:", error);
         Alert.alert("Error", "Could not save the API key.");
@@ -41,7 +41,7 @@ const Gemini = () => {
   const handleSkip = async () => {
     try {
       await saveItem(STORAGE_KEYS.ONBOARDING, "true");
-      router.replace("/(tabs)")
+      router.replace("/(tabs)/dashboard")
     } catch (error) {
       console.error("Error skipping:", error);
       Alert.alert("Error", "Could not proceed.");
