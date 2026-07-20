@@ -98,7 +98,7 @@ export async function getCompletedGoals() {
         const goals = await getAllGoals();
 
         return goals.filter(
-            (goal) => goal.isCompleted
+            (goal: any) => goal.isCompleted
         );
     } catch (error) {
         console.error("Error getting completed goals:", error);
@@ -111,7 +111,7 @@ export async function getActiveGoals() {
         const goals = await getAllGoals();
 
         return goals.filter(
-            (goal) => !goal.isCompleted
+            (goal: any) => !goal.isCompleted
         );
     } catch (error) {
         console.error("Error getting active goals:", error);
@@ -124,7 +124,7 @@ export async function getTotalGoalSavings() {
         const goals = await getAllGoals();
 
         return goals.reduce(
-            (sum, goal) =>
+            (sum: number, goal: any) =>
                 sum + goal.savedAmount,
             0
         );

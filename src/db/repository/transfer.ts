@@ -13,10 +13,10 @@ type CreateTransfer = {
 
 type UpdateTransfer = CreateTransfer;
 
-export async function createTransfer(data: CreateTransfer) {
+export async function createTransfer(data: CreateTransfer, tx: any = db) {
   const now = Date.now();
 
-  await db.insert(Transfers).values({
+  await tx.insert(Transfers).values({
     id: randomUUID(),
     ...data,
     createdAt: now,
@@ -24,8 +24,8 @@ export async function createTransfer(data: CreateTransfer) {
   });
 }
 
-export async function getTransferById(id: string) {
-  const result = await db
+export async function getTransferById(id: string, tx: any = db) {
+  const result = await tx
     .select()
     .from(Transfers)
     .where(eq(Transfers.id, id));
@@ -33,15 +33,16 @@ export async function getTransferById(id: string) {
   return result[0] ?? null;
 }
 
-export async function getAllTransfers() {
-  return await db.select().from(Transfers);
+export async function getAllTransfers(tx: any = db) {
+  return await tx.select().from(Transfers);
 }
 
 export async function updateTransfer(
   id: string,
-  data: UpdateTransfer
+  data: UpdateTransfer,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Transfers)
     .set({
       ...data,
@@ -50,8 +51,8 @@ export async function updateTransfer(
     .where(eq(Transfers.id, id));
 }
 
-export async function deleteTransfer(id: string) {
-  await db
+export async function deleteTransfer(id: string, tx: any = db) {
+  await tx
     .delete(Transfers)
     .where(eq(Transfers.id, id));
 }
