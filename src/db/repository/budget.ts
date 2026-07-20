@@ -12,10 +12,10 @@ type CreateBudget = {
 };
 
 //function to createa budget
-export async function createBudget(data: CreateBudget) {
+export async function createBudget(data: CreateBudget, tx: any = db) {
     const now = Date.now()
 
-    await db.insert(Budgets).values({
+    await tx.insert(Budgets).values({
         id: randomUUID(),
         categoryId: data.categoryId,
         limit: data.limit,
@@ -27,8 +27,8 @@ export async function createBudget(data: CreateBudget) {
 }
 
 //function to get a budget by id
-export async function getBudgetById(id: string) {
-  const result = await db
+export async function getBudgetById(id: string, tx: any = db) {
+  const result = await tx
     .select()
     .from(Budgets)
     .where(eq(Budgets.id, id));
@@ -37,8 +37,8 @@ export async function getBudgetById(id: string) {
 }
 
 //function to get all budgets
-export async function getAllBudgets() {
-  return await db.select().from(Budgets);
+export async function getAllBudgets(tx: any = db) {
+  return await tx.select().from(Budgets);
 }
 
 //type for updating a budget
@@ -52,9 +52,10 @@ type UpdateBudget = {
 //function to update a budget
 export async function updateBudget(
   id: string,
-  data: UpdateBudget
+  data: UpdateBudget,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Budgets)
     .set({
       categoryId: data.categoryId,
@@ -67,8 +68,8 @@ export async function updateBudget(
 }
 
 //function to delete a budget
-export async function deleteBudget(id: string) {
-  await db
+export async function deleteBudget(id: string, tx: any = db) {
+  await tx
     .delete(Budgets)
     .where(eq(Budgets.id, id));
 }
@@ -76,9 +77,10 @@ export async function deleteBudget(id: string) {
 //fuction to get a budget by month 
 export async function getBudgetByMonth(
   month: number,
-  year: number
+  year: number,
+  tx: any = db
 ) {
-  return await db
+  return await tx
     .select()
     .from(Budgets)
     .where(

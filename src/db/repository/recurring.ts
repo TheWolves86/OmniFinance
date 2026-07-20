@@ -13,10 +13,10 @@ type CreateRecurring = {
 
 type UpdateRecurring = CreateRecurring
 
-export async function createRecurring(data: CreateRecurring) {
+export async function createRecurring(data: CreateRecurring, tx: any = db) {
     const now = Date.now()
 
-    await db.insert(recurringTransaction).values({
+    await tx.insert(recurringTransaction).values({
         id: randomUUID(),
         transactionId: data.transactionId,
         frequency: data.frequency,
@@ -29,8 +29,8 @@ export async function createRecurring(data: CreateRecurring) {
 }
 
 //function to get a recurring transaction by id
-export async function getRecurringById(id: string) {
-  const result = await db
+export async function getRecurringById(id: string, tx: any = db) {
+  const result = await tx
     .select()
     .from(recurringTransaction)
     .where(eq(recurringTransaction.id, id));
@@ -39,17 +39,18 @@ export async function getRecurringById(id: string) {
 }
 
 //function to get all recurring transactions
-export async function getAllRecurring() {
-  return await db.select().from(recurringTransaction);
+export async function getAllRecurring(tx: any = db) {
+  return await tx.select().from(recurringTransaction);
 }
 
 
 //function to update a recurring transaction
 export async function updateRecurring(
   id: string,
-  data: UpdateRecurring
+  data: UpdateRecurring,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(recurringTransaction)
     .set({
       transactionId: data.transactionId,
@@ -63,17 +64,17 @@ export async function updateRecurring(
 }
 
 //function to delete a recurring transaction
-export async function deleteRecurring(id: string) {
-  await db
+export async function deleteRecurring(id: string, tx: any = db) {
+  await tx
     .delete(recurringTransaction)
     .where(eq(recurringTransaction.id, id));
 }
 
 //function to get due recurring transactions
-export async function getDueRecurringTransactions() {
+export async function getDueRecurringTransactions(tx: any = db) {
   const now = Date.now();
 
-  return await db
+  return await tx
     .select()
     .from(recurringTransaction)
     .where(

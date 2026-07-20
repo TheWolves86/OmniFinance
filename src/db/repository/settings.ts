@@ -4,14 +4,15 @@ import { eq } from "drizzle-orm"
 
 //function to save settings
 export async function saveSettings(
-  data: typeof Settings.$inferInsert
+  data: typeof Settings.$inferInsert,
+  tx: any = db
 ) {
-  await db.insert(Settings).values(data);
+  await tx.insert(Settings).values(data);
 }
 
 //function to get settings
-export async function getSettings() {
-  const result = await db
+export async function getSettings(tx: any = db) {
+  const result = await tx
     .select()
     .from(Settings);
 
@@ -22,9 +23,10 @@ export async function getSettings() {
 export async function updateSettings(
   data: Partial<
     typeof Settings.$inferInsert
-  >
+  >,
+  tx: any = db
 ) {
-  await db
+  await tx
     .update(Settings)
     .set({
       ...data,

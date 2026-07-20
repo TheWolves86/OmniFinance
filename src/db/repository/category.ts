@@ -13,10 +13,10 @@ type CreateCategory = {
 }
 
 //the function to create a category
-export async function createCategory(data: CreateCategory){
+export async function createCategory(data: CreateCategory, tx: any = db){
     const now = Date.now();
 
-    await db.insert(Categories).values({
+    await tx.insert(Categories).values({
         id: randomUUID(),
         name: data.name,
         icon: data.icon,
@@ -28,8 +28,8 @@ export async function createCategory(data: CreateCategory){
 };
 
 //the function to get a category bt id
-export async function getCategoryById(id: string){
-    const result = await db
+export async function getCategoryById(id: string, tx: any = db){
+    const result = await tx
         .select()
         .from(Categories)
         .where(eq(Categories.id, id));
@@ -37,8 +37,8 @@ export async function getCategoryById(id: string){
 };
 
 //the function to get all categories
-export async function getAllCategory(){
-    return await db.select().from(Categories);
+export async function getAllCategory(tx: any = db){
+    return await tx.select().from(Categories);
 };
 
 //the type for updating a category
@@ -51,8 +51,8 @@ type updateCategory = {
 };
 
 //the function to update a category
-export async function updateCategory(id: string, data: updateCategory){
-    await db
+export async function updateCategory(id: string, data: updateCategory, tx: any = db){
+    await tx
         .update(Categories)
         .set({
         name: data.name,
@@ -65,23 +65,23 @@ export async function updateCategory(id: string, data: updateCategory){
 }
 
 //the function to delete a category by id
-export async function deleteCategory(id: string){
-    await db
+export async function deleteCategory(id: string, tx: any = db){
+    await tx
         .delete(Categories)
         .where(eq(Categories.id, id));
 };
 
 //the function to get all the income categories
-export async function getIncomeCategory(){
-    return await db
+export async function getIncomeCategory(tx: any = db){
+    return await tx
         .select()
         .from(Categories)
         .where(eq(Categories.type, "income"));
 };
 
 //the function to get all the expense categories
-export async function getExpenseCategories() {
-  return await db
+export async function getExpenseCategories(tx: any = db) {
+  return await tx
     .select()
     .from(Categories)
     .where(eq(Categories.type, "expense"));
