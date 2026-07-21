@@ -1,8 +1,9 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react"
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { View, Text, Pressable, StyleSheet, ScrollView} from "react-native"
+import { View, Text, Pressable, StyleSheet} from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { ScrollView } from "react-native-gesture-handler";
 
 const expenseCategories = [
   {
