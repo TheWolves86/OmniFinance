@@ -1,47 +1,21 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react"
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { View, Text, Pressable, StyleSheet} from "react-native"
+import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 const expenseCategories = [
-  {
-    name: "Food & Drinks",
-    icon: "fast-food-outline"
-  },
-  {
-    name: "Transportation",
-    icon: "car-outline"
-  },
-  {
-    name: "Groceries",
-    icon: "basket-outline"
-  },
-  {
-    name: "Utilities",
-    icon: "flash-outline"
-  },
-  {
-    name: "Housing",
-    icon: "home-outline"
-  },
-  {
-    name: "Personal Care",
-    icon: "heart-outline"
-  },
-  {
-    name: "Entertainment",
-    icon: "film-outline"
-  },
-  {
-    name: "Miscellaneous",
-    icon: "cube-outline"
-  },
-  {
-    name: "Others",
-    icon: "ellipsis-horizontal-circle-outline"
-  }
+  {name: "Food & Drinks",icon: "fast-food-outline"},
+  {name: "Transportation",icon: "car-outline"},
+  {name: "Groceries",icon: "basket-outline"},
+  {name: "Utilities",icon: "flash-outline"},
+  {name: "Housing",icon: "home-outline"},
+  {name: "Personal Care",icon: "heart-outline"},
+  {name: "Entertainment",icon: "film-outline"},
+  {name: "Miscellaneous",icon: "cube-outline"},
+  {name: "Others",icon: "ellipsis-horizontal-circle-outline"}
 ]
 
 const incomeCategories = [
@@ -55,7 +29,10 @@ const incomeCategories = [
   { name: "Other", icon: "ellipsis-horizontal-circle-outline" },
 ];
 
-
+const accounts = [
+  {id: "cash",name: "Cash"},
+  {id: "bank", name: "Bank"}
+]
 
 const COLORS = {
   background: "#F7F8FA",
@@ -86,6 +63,11 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [ amount, setAmount ] = useState("")
   const amountInputRef = useRef<React.ElementRef<typeof BottomSheetTextInput>>(null)
   const [selectedCategory, setSelectedCategory] = useState("Food & Drinks")
+  const [selectedAccount, setSelectedAccount] = useState("cash")
+  const [transactionDate, setTransactionDate] = useState(new Date());
+  const [notes, setNotes] = useState("");
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
 
   const displayedCategories =
   transactionType === "income"
@@ -99,6 +81,33 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       setSelectedCategory(firstCategory.name);
     }
   }, [transactionType]);
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      UIManager.setLayoutAnimationEnabledExperimental?.(true);
+    }
+  }, []);
+
+  const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setIsDatePickerOpen(false);
+    }
+
+    if (event.type === "set" && selectedDate) {
+      setTransactionDate(selectedDate);
+    }
+  };
+
+  const toggleNotes = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsNotesExpanded((current) => !current);
+  };
+
+  const formattedDate = transactionDate.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
   return (
     <BottomSheetModal
       ref={ref}
@@ -193,6 +202,79 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
               )
             })}
           </ScrollView>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Accounts
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.accountContainer}>
+            {accounts.map((account) => {
+              const selected = selectedAccount === account.id;
+
+              return (
+                <Pressable key={account.id} onPress={() => setSelectedAccount(account.id)}
+                style={[styles.accountChip, selected && styles.selectedAccountChip]}>
+                  <Text style={[styles.accountText, selected && styles.selectedAccountText]}>
+                    {account.name}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </ScrollView>
+        </View>
+        <View style={styles.section}>
+          <Pressable style={styles.detailRow} onPress={() => setIsDatePickerOpen(true)}>
+            <View style={styles.leftSection}>
+              <Ionicons name="calendar-outline" size={18} color="#6B7280"/>
+              <Text style={styles.detailTitle}>
+                Date
+              </Text>
+            </View>
+            <View style={styles.rightSection}>
+              <Text style={styles.detailValue}>
+                {formattedDate}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color="#9CA3AF"/>
+            </View>
+          </Pressable>
+          {isDatePickerOpen && (
+            <DateTimePicker
+              value={transactionDate}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleDateChange}
+            />
+          )}
+          <View style={styles.divider}/>
+          <Pressable style={styles.detailRow} onPress={toggleNotes}>
+            <View style={styles.leftSection}>
+              <Ionicons name="document-text-outline" size={18} color="#6b7280"/>
+              <Text style={styles.detailTitle}>
+                Notes
+              </Text>
+            </View>
+            {!isNotesExpanded && (
+              <View style={styles.rightSection}>
+                <Text numberOfLines={1} style={[styles.detailValue, notes === "" && styles.placeholder]}>{notes || "Optional"}</Text>
+                <Ionicons name="chevron-forward" size={16} color="#9CA3AF"/>
+              </View>
+            )}
+          </Pressable>
+          {isNotesExpanded && (
+            <View style={styles.notesInputContainer}>
+              <BottomSheetTextInput
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="Write a note..."
+                placeholderTextColor="#A1A8B5"
+                multiline
+                textAlignVertical="top"
+                blurOnSubmit={false}
+                returnKeyType="default"
+                style={styles.notesInput}
+              />
+            </View>
+          )}
         </View>
       </BottomSheetScrollView>
     </BottomSheetModal>
@@ -306,7 +388,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: "#F8F9FC",
+    backgroundColor: "#eef0f5",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -316,5 +398,76 @@ const styles = StyleSheet.create({
     backgroundColor: "#0B1D3A",
     borderColor: "#0B1D3A",
     borderRadius: 14
-  }
+  },
+  accountContainer:{
+    paddingRight: 20
+  },
+  accountChip: {
+    paddingHorizontal: 18,
+    height: 38,
+    borderRadius: 20,
+    backgroundColor: "#eef0f5",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E8ECF2",
+    marginRight: 10
+  },
+  selectedAccountChip: {
+    backgroundColor: "#0B1D3A",
+    borderColor: "#0B1D3A"
+  },
+  accountText: {
+    fontSize: 14,
+    color: "#4B5563",
+    fontWeight: "500",
+  },
+  selectedAccountText: {
+    color: "#FFFFFF"
+  },
+  detailRow: {
+    height: 58,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  rightSection: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  detailTitle: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: "#0B1D3A",
+  },
+  detailValue: {
+    fontSize: 15,
+    color: "#4B5563",
+    marginRight: 8,
+  },
+  placeholder: {
+    color: "#A1A8B5",
+  },
+  notesInputContainer: {
+    backgroundColor: "#F7F8FA",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
+  },
+  notesInput: {
+    minHeight: 90,
+    fontSize: 15,
+    color: "#0B1D3A",
+    padding: 0,
+    margin: 0,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#ECEEF2",
+  },
 });
