@@ -1,7 +1,46 @@
-﻿import React, { forwardRef, useMemo, useCallback, useState} from "react"
-import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView,} from "@gorhom/bottom-sheet";
-import { View, Text, Pressable, StyleSheet, TextInput} from "react-native"
+﻿import React, { forwardRef, useMemo, useCallback, useState, useRef} from "react"
+import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
+import { View, Text, Pressable, StyleSheet} from "react-native"
 import SwitchSelector from "react-native-switch-selector"
+
+const expenseCategories = [
+  {
+    name: "Food & Drinks",
+    icon: "fast-food-outline"
+  },
+  {
+    name: "Transportation",
+    icon: "car-outline"
+  },
+  {
+    name: "Groceries",
+    icon: "basket-outline"
+  },
+  {
+    name: "Utilities",
+    icon: "flash-outline"
+  },
+  {
+    name: "Housing",
+    icon: "home-outline"
+  },
+  {
+    name: "Personal Care",
+    icon: "heart-outline"
+  },
+  {
+    name: "Entertainment",
+    icon: "film-outline"
+  },
+  {
+    name: "Miscellaneous",
+    icon: "cube-outline"
+  },
+  {
+    name: "Others",
+    icon: "ellipsis-horizontal-circle-outline"
+  }
+]
 
 const COLORS = {
   background: "#F7F8FA",
@@ -29,7 +68,9 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
 
   const [ transactionType, setTransactionType ] = useState<"income" | "expense">("expense")
   const [ title, setTitle ] = useState("")
-  const [ amount, setAmount ] = useState("4500")
+  const [ amount, setAmount ] = useState("")
+  const amountInputRef = useRef<React.ElementRef<typeof BottomSheetTextInput>>(null)
+  const [selectedCategory, setSelectedCategory] = useState("Food & Drinks")
 
   return (
     <BottomSheetModal
@@ -39,12 +80,10 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       backdropComponent={renderBackDrop}
       enablePanDownToClose
       handleIndicatorStyle={styles.handle}
-      backgroundStyle={styles.background}
-    >
+      backgroundStyle={styles.background}>
       <BottomSheetScrollView
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable>
             <Text style={styles.cancel}>Cancel</Text>
@@ -80,22 +119,34 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                 label: "Expense",
                 value: "expense"
               }
-            ]}
-          />
+            ]}/>
         </View>
         <View style={styles.amountContainer}>
           <Text style={styles.amountLabel}>
             AMOUNT
           </Text>
-          <View style={styles.amountRow}>
+          <Pressable style={styles.amountRow} onPress={() => amountInputRef.current?.focus()}>
             <Text style={styles.rupee}>
               ₹
             </Text>
-            <Text style={styles.amount}>
-              {Number(amount).toLocaleString("en-IN")}
-            </Text>
-          </View>
+            <BottomSheetTextInput
+              ref={amountInputRef}
+              value={
+                amount === "" ? "" : Number(amount).toLocaleString("en-IN")
+              }
+              onChangeText={(text) => {
+                const clean = text.replace(/\D/g, "");
+                setAmount(clean);
+              }}
+              keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor="#C5CAD3"
+              cursorColor="#0B1D3A"
+              style={styles.amountInput}
+            ></BottomSheetTextInput>
+          </Pressable>
         </View>
+        
       </BottomSheetScrollView>
     </BottomSheetModal>
   )
@@ -164,9 +215,36 @@ const styles = StyleSheet.create({
     marginRight: 8,
     fontWeight: "600"
   },
-  amount: {
+  amountInput: {
     fontSize: 42,
     fontWeight: "800",
-    color: "#0B1D3A"
+    color: "#0B1D3A",
+    padding: 0,
+    margin: 0,
+    minWidth: 150,
+  },
+  categoryCard: {
+    width: 90,
+    height: 90,
+    borderRadius: 22,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: "#ECEEF2"
+  },
+  selectedCtaegoryCard: {
+    backgroundColor: "#0B1D3A",
+  },
+  categoryText: {
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 12,
+    color: "#0B1D3A",
+    fontWeight: "600"
+  },
+  selectedCategoryText: {
+    color: "#FFFFFF"
   }
-})
+});
