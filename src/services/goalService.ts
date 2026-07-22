@@ -1,4 +1,5 @@
 import { createGoal, getAllGoals, getGoalById, updateGoal } from "@/src/db/repository/goal";
+import { db } from "@/src/db/index";
 
 type CreateGoalData = Parameters<typeof createGoal>[0];
 
@@ -18,23 +19,25 @@ export async function addMoneyToGoal(
     amount: number
 ) {
     try {
-        const goal = await getGoalById(goalId);
+        await db.transaction(async (tx) => {
+            const goal = await getGoalById(goalId, tx);
 
-        if (!goal) {
-            throw new Error("Goal not found")
-        }
+            if (!goal) {
+                throw new Error("Goal not found")
+            }
 
-        const newSavedAmount = goal.savedAmount + amount;
+            const newSavedAmount = goal.savedAmount + amount;
 
-        const isCompleted = newSavedAmount >= goal.targetAmount;
+            const isCompleted = newSavedAmount >= goal.targetAmount;
 
-        await updateGoal(goalId, {
-            title: goal.title,
-            description: goal.description ?? undefined,
-            targetAmount: goal.targetAmount,
-            savedAmount: newSavedAmount,
-            targetDate: goal.targetDate ?? undefined,
-            isCompleted
+            await updateGoal(goalId, {
+                title: goal.title,
+                description: goal.description ?? undefined,
+                targetAmount: goal.targetAmount,
+                savedAmount: newSavedAmount,
+                targetDate: goal.targetDate ?? undefined,
+                isCompleted
+            }, tx);
         });
     } catch (error) {
         console.error("Error adding money to goal:", error);
@@ -47,24 +50,26 @@ export async function withdrawMoneyFromGoal(
     amount: number
 ) {
     try {
-        const goal = await getGoalById(goalId);
+        await db.transaction(async (tx) => {
+            const goal = await getGoalById(goalId, tx);
 
-        if (!goal) {
-            throw new Error("Goal not found");
-        }
+            if (!goal) {
+                throw new Error("Goal not found");
+            }
 
-        const newSavedAmount = Math.max(
-            0,
-            goal.savedAmount - amount
-        );
+            const newSavedAmount = Math.max(
+                0,
+                goal.savedAmount - amount
+            );
 
-        await updateGoal(goalId, {
-            title: goal.title,
-            description: goal.description ?? undefined,
-            targetAmount: goal.targetAmount,
-            savedAmount: newSavedAmount,
-            targetDate: goal.targetDate ?? undefined,
-            isCompleted: false,
+            await updateGoal(goalId, {
+                title: goal.title,
+                description: goal.description ?? undefined,
+                targetAmount: goal.targetAmount,
+                savedAmount: newSavedAmount,
+                targetDate: goal.targetDate ?? undefined,
+                isCompleted: false,
+            }, tx);
         });
     } catch (error) {
         console.error("Error withdrawing money from goal:", error);
