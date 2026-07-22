@@ -1,7 +1,7 @@
 import { db } from "../index";
 import { Categories } from "../schema";
 import { randomUUID } from "expo-crypto";
-import { eq, and } from "drizzle-orm";
+import { eq, and, count} from "drizzle-orm";
 
 //the type for creating a category
 type CreateCategory = {
@@ -86,3 +86,13 @@ export async function getExpenseCategories(tx: any = db) {
     .from(Categories)
     .where(eq(Categories.type, "expense"));
 };
+
+//the function to get total category count
+export async function getCategoryCount(){
+    const result = await db
+        .select({
+            count: count()
+        })
+        .from(Categories)
+    return result[0].count;
+}

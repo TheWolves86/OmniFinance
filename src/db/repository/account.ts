@@ -1,7 +1,7 @@
 import { db } from "../index";
 import { Accounts } from "../schema";
 import { randomUUID } from "expo-crypto";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 
 //type for creating an account
 type createAccount = {
@@ -96,3 +96,15 @@ export async function updateBalance(id: string,balance: number, tx: any = db) {
     })
     .where(eq(Accounts.id, id));
 };
+
+//function to get total account count
+export async function getAccountCount(){
+  const result = await db
+    .select({
+      count: count()
+    })
+    .from(Accounts)
+
+  return result[0].count;
+}
+
