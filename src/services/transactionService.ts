@@ -7,14 +7,20 @@ const balanceAfter = (balance:number, type:string, amount:number) => balance + (
 const reverseBalance = (balance:number, type:string, amount:number) => balance + (type === "income" ? -amount : amount);
 
 export async function addTransaction(data:AddTransactionData) {
+  try {
   await db.withTransactionAsync(async () => {
     const account = await getAccountById(data.accountId);
     if (!account) throw new Error("Account not found");
     await createTransaction(data);
     await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount));
   });
+  } catch (error) {
+    console.error("Error in transaction service:", error);
+    throw error;
+  }
 }
 export async function deleteTransactionService(transactionId:string) {
+  try {
   await db.withTransactionAsync(async () => {
     const transaction = await getTransactionById(transactionId);
     if (!transaction) throw new Error("Transaction not found");
@@ -23,8 +29,13 @@ export async function deleteTransactionService(transactionId:string) {
     await deleteTransaction(transactionId);
     await updateBalance(account.id, reverseBalance(account.balance, transaction.type, transaction.amount));
   });
+  } catch (error) {
+    console.error("Error in transaction service:", error);
+    throw error;
+  }
 }
 export async function editTransactionService(transactionId:string,data:AddTransactionData) {
+  try {
   await db.withTransactionAsync(async () => {
     const oldTransaction = await getTransactionById(transactionId);
     if (!oldTransaction) throw new Error("Transaction not found");
@@ -41,4 +52,8 @@ export async function editTransactionService(transactionId:string,data:AddTransa
       await updateBalance(newAccount.id, balanceAfter(newAccount.balance, data.type, data.amount));
     }
   });
+  } catch (error) {
+    console.error("Error in transaction service:", error);
+    throw error;
+  }
 }
