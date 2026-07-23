@@ -1,144 +1,16 @@
-import { db } from "../index";
-import { Accounts } from "../schema";
 import { randomUUID } from "expo-crypto";
-import { eq, count } from "drizzle-orm";
+import { db } from "../index";
 
-//type for creating an account
-type CreateAccount = {
-    name: string;
-    type: string;
-    balance: number;
-    currency: string;
-    icon?: string;
-    color?: string;
-    isDefault: boolean;
-};
+type AccountInput = { name: string; type: string; balance: number; currency: string; icon?: string; color?: string; isDefault: boolean };
+const columns = "id, name, type, balance, curreny AS currency, icon, color, is_default AS isDefault, created_at AS createdAt, updated_at AS updatedAt";
 
-//function to create an account
-export async function createAccount(data: CreateAccount, tx: any = db) {
-  try {
-    const now = Date.now();
-
-    await tx.insert(Accounts).values({
-        id: randomUUID(),
-        name: data.name,
-        type: data.type,
-        balance: data.balance,
-        currency: data.currency,
-        icon: data.icon,
-        color: data.color,
-        isDefault: data.isDefault,
-        createdAt: now,
-        updatedAt: now,
-    });
-  } catch (error) {
-    console.error("Error creating account:", error);
-    throw error;
-  }
+export async function createAccount(data: AccountInput, tx: any = db) {
+  try { const now = Date.now(); await tx.runAsync("INSERT INTO accounts (id,name,type,balance,curreny,icon,color,is_default,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)", randomUUID(), data.name, data.type, data.balance, data.currency, data.icon ?? null, data.color ?? null, data.isDefault ? 1 : 0, now, now); }
+  catch (error) { throw new Error(`Unable to create account: ${String(error)}`); }
 }
-
-//function to get an account by id
-export async function getAccountById(id: string, tx: any = db) {
-  try {
-    const result = await tx
-        .select()
-        .from(Accounts)
-        .where(eq(Accounts.id, id));
-
-    return result[0] ?? null;
-  } catch (error) {
-    console.error("Error fetching account by id:", error);
-    throw error;
-  }
-};
-
-//function to get all accounts
-export async function getAllAccounts(tx: any = db) {
-  try {
-    return await tx.select().from(Accounts);
-  } catch (error) {
-    console.error("Error fetching all accounts:", error);
-    throw error;
-  }
-}
-
-//type for updating an account
-type UpdateAccount = {
-    name: string;
-    type: string;
-    balance: number;
-    currency: string;
-    icon?: string;
-    color?: string;
-    isDefault: boolean;
-}
-
-//function to update account details
-export async function updateAccount(
-  id: string,
-  data: UpdateAccount,
-  tx: any = db
-) {
-  try {
-    await tx
-      .update(Accounts)
-      .set({
-        name: data.name,
-        type: data.type,
-        balance: data.balance,
-        currency: data.currency,
-        icon: data.icon,
-        color: data.color,
-        isDefault: data.isDefault,
-        updatedAt: Date.now(),
-      })
-      .where(eq(Accounts.id, id));
-  } catch (error) {
-    console.error("Error updating account:", error);
-    throw error;
-  }
-};
-
-//function to delete an account
-export async function deleteAccount(id: string, tx: any = db){
-  try {
-    await tx
-        .delete(Accounts)
-        .where(eq(Accounts.id, id));
-  } catch (error) {
-    console.error("Error deleting account:", error);
-    throw error;
-  }
-}
-
-//function to update the account's balance
-export async function updateBalance(id: string,balance: number, tx: any = db) {
-  try {
-    await tx
-      .update(Accounts)
-      .set({
-        balance,
-        updatedAt: Date.now(),
-      })
-      .where(eq(Accounts.id, id));
-  } catch (error) {
-    console.error("Error updating account balance:", error);
-    throw error;
-  }
-};
-
-//function to get total account count
-export async function getAccountCount(){
-  try {
-    const result = await db
-      .select({
-        count: count()
-      })
-      .from(Accounts)
-
-    return result[0]?.count ?? 0;
-  } catch (error) {
-    console.error("Error fetching account count:", error);
-    throw error;
-  }
-}
+export async function getAccountById(id: string, tx: any = db) { try { return await tx.getFirstAsync(`SELECT ${columns} FROM accounts WHERE id = ?`, id); } catch (error) { throw new Error(`Unable to fetch account: ${String(error)}`); } }
+export async function getAllAccounts(tx: any = db) { try { return await tx.getAllAsync(`SELECT ${columns} FROM accounts ORDER BY name`); } catch (error) { throw new Error(`Unable to fetch accounts: ${String(error)}`); } }
+export async function updateAccount(id: string, data: AccountInput, tx: any = db) { try { await tx.runAsync("UPDATE accounts SET name=?, type=?, balance=?, curreny=?, icon=?, color=?, is_default=?, updated_at=? WHERE id=?", data.name, data.type, data.balance, data.currency, data.icon ?? null, data.color ?? null, data.isDefault ? 1 : 0, Date.now(), id); } catch (error) { throw new Error(`Unable to update account: ${String(error)}`); } }
+export async function deleteAccount(id: string, tx: any = db) { try { await tx.runAsync("DELETE FROM accounts WHERE id = ?", id); } catch (error) { throw new Error(`Unable to delete account: ${String(error)}`); } }
+export async function updateBalance(id: string, balance: number, tx: any = db) { try { await tx.runAsync("UPDATE accounts SET balance=?, updated_at=? WHERE id=?", balance, Date.now(), id); } catch (error) { throw new Error(`Unable to update account balance: ${String(error)}`); } }
+export async function getAccountCount() { try { const row = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM accounts"); return row?.count ?? 0; } catch (error) { throw new Error(`Unable to count accounts: ${String(error)}`); } }

@@ -1,36 +1,6 @@
 import { db } from "../index";
-import { Settings } from "../schema";
-import { eq } from "drizzle-orm"
-
-//function to save settings
-export async function saveSettings(
-  data: typeof Settings.$inferInsert,
-  tx: any = db
-) {
-  await tx.insert(Settings).values(data);
-}
-
-//function to get settings
-export async function getSettings(tx: any = db) {
-  const result = await tx
-    .select()
-    .from(Settings);
-
-  return result[0] ?? null;
-}
-
-//function to update settings
-export async function updateSettings(
-  data: Partial<
-    typeof Settings.$inferInsert
-  >,
-  tx: any = db
-) {
-  await tx
-    .update(Settings)
-    .set({
-      ...data,
-      updatedAt: Date.now(),
-    })
-    .where(eq(Settings.id, 1));
-}
+export type SettingsInput={id:number;currency:string;theme:string;language:string;ai_provider?:string;api?:string;biometricEnabled:boolean;updatedAt:number};
+const columns="id,currency,theme,language,ai_provider,api,biometric_enabled AS biometricEnabled,updated_at AS updatedAt";
+export async function saveSettings(data:SettingsInput,tx:any=db){try{await tx.runAsync("INSERT INTO settigs (id,currency,theme,language,ai_provider,api,biometric_enabled,updated_at) VALUES (?,?,?,?,?,?,?,?)",data.id,data.currency,data.theme,data.language,data.ai_provider??null,data.api??null,data.biometricEnabled?1:0,data.updatedAt);}catch(error){throw new Error(`Unable to save settings: ${String(error)}`);}}
+export async function getSettings(tx:any=db){try{return await tx.getFirstAsync(`SELECT ${columns} FROM settigs LIMIT 1`);}catch(error){throw new Error(`Unable to fetch settings: ${String(error)}`);}}
+export async function updateSettings(data:Partial<SettingsInput>,tx:any=db){try{const current=await getSettings(tx);if(!current)throw new Error("Settings not found");await tx.runAsync("UPDATE settigs SET currency=?,theme=?,language=?,ai_provider=?,api=?,biometric_enabled=?,updated_at=? WHERE id=1",data.currency??current.currency,data.theme??current.theme,data.language??current.language,data.ai_provider??current.ai_provider,data.api??current.api,data.biometricEnabled===undefined?current.biometricEnabled?1:0:data.biometricEnabled?1:0,Date.now());}catch(error){throw new Error(`Unable to update settings: ${String(error)}`);}}

@@ -1,98 +1,12 @@
-import { db } from "../index";
-import { Categories } from "../schema";
 import { randomUUID } from "expo-crypto";
-import { eq, and, count} from "drizzle-orm";
-
-//the type for creating a category
-type CreateCategory = {
-    name: string,
-    icon: string,
-    color: string,
-    type: string,
-    isDefault: boolean
-}
-
-//the function to create a category
-export async function createCategory(data: CreateCategory, tx: any = db){
-    const now = Date.now();
-
-    await tx.insert(Categories).values({
-        id: randomUUID(),
-        name: data.name,
-        icon: data.icon,
-        color: data.color,
-        type: data.type,
-        isDefault: data.isDefault,
-        createdAt: now
-    });
-};
-
-//the function to get a category bt id
-export async function getCategoryById(id: string, tx: any = db){
-    const result = await tx
-        .select()
-        .from(Categories)
-        .where(eq(Categories.id, id));
-    return result[0] ?? null;
-};
-
-//the function to get all categories
-export async function getAllCategory(tx: any = db){
-    return await tx.select().from(Categories);
-};
-
-//the type for updating a category
-type updateCategory = {
-    name: string;
-    icon: string;
-    color: string;
-    type: string;
-    isDefault: boolean;
-};
-
-//the function to update a category
-export async function updateCategory(id: string, data: updateCategory, tx: any = db){
-    await tx
-        .update(Categories)
-        .set({
-        name: data.name,
-        icon: data.icon,
-        color: data.color,
-        type: data.type,
-        isDefault: data.isDefault,
-        })
-        .where(eq(Categories.id, id));
-}
-
-//the function to delete a category by id
-export async function deleteCategory(id: string, tx: any = db){
-    await tx
-        .delete(Categories)
-        .where(eq(Categories.id, id));
-};
-
-//the function to get all the income categories
-export async function getIncomeCategory(tx: any = db){
-    return await tx
-        .select()
-        .from(Categories)
-        .where(eq(Categories.type, "income"));
-};
-
-//the function to get all the expense categories
-export async function getExpenseCategories(tx: any = db) {
-  return await tx
-    .select()
-    .from(Categories)
-    .where(eq(Categories.type, "expense"));
-};
-
-//the function to get total category count
-export async function getCategoryCount(){
-    const result = await db
-        .select({
-            count: count()
-        })
-        .from(Categories)
-    return result[0].count;
-}
+import { db } from "../index";
+type CategoryInput = { name: string; icon: string; color: string; type: string; isDefault: boolean };
+const columns = "id,name,icon,color,type,is_default AS isDefault,created_at AS createdAt";
+export async function createCategory(data: CategoryInput, tx: any = db) { try { await tx.runAsync("INSERT INTO categories (id,name,icon,color,type,is_default,created_at) VALUES (?,?,?,?,?,?,?)", randomUUID(), data.name, data.icon, data.color, data.type, data.isDefault ? 1 : 0, Date.now()); } catch (error) { throw new Error(`Unable to create category: ${String(error)}`); } }
+export async function getCategoryById(id: string, tx: any = db) { try { return await tx.getFirstAsync(`SELECT ${columns} FROM categories WHERE id=?`, id); } catch (error) { throw new Error(`Unable to fetch category: ${String(error)}`); } }
+export async function getAllCategory(tx: any = db) { try { return await tx.getAllAsync(`SELECT ${columns} FROM categories ORDER BY name`); } catch (error) { throw new Error(`Unable to fetch categories: ${String(error)}`); } }
+export async function updateCategory(id: string, data: CategoryInput, tx: any = db) { try { await tx.runAsync("UPDATE categories SET name=?,icon=?,color=?,type=?,is_default=? WHERE id=?", data.name, data.icon, data.color, data.type, data.isDefault ? 1 : 0, id); } catch (error) { throw new Error(`Unable to update category: ${String(error)}`); } }
+export async function deleteCategory(id: string, tx: any = db) { try { await tx.runAsync("DELETE FROM categories WHERE id=?", id); } catch (error) { throw new Error(`Unable to delete category: ${String(error)}`); } }
+export async function getIncomeCategory(tx: any = db) { return tx.getAllAsync(`SELECT ${columns} FROM categories WHERE type='income' ORDER BY name`); }
+export async function getExpenseCategories(tx: any = db) { return tx.getAllAsync(`SELECT ${columns} FROM categories WHERE type='expense' ORDER BY name`); }
+export async function getCategoryCount() { try { const row = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM categories"); return row?.count ?? 0; } catch (error) { throw new Error(`Unable to count categories: ${String(error)}`); } }

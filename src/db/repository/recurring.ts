@@ -1,86 +1,10 @@
-import { db } from "../index";
-import { recurringTransaction } from "../schema";
 import { randomUUID } from "expo-crypto";
-import { eq } from "drizzle-orm";
-
-type CreateRecurring = {
-    transactionId: string;
-    frequency: string;
-    nextRun: number;
-    lastRun?: number;
-    isActive: boolean;
-}
-
-type UpdateRecurring = CreateRecurring
-
-export async function createRecurring(data: CreateRecurring, tx: any = db) {
-    const now = Date.now()
-
-    await tx.insert(recurringTransaction).values({
-        id: randomUUID(),
-        transactionId: data.transactionId,
-        frequency: data.frequency,
-        nextRun: data.nextRun,
-        lastRun: data.lastRun,
-        isActive: data.isActive,
-        createdAt: now,
-        updatedAt: now,
-    });
-}
-
-//function to get a recurring transaction by id
-export async function getRecurringById(id: string, tx: any = db) {
-  const result = await tx
-    .select()
-    .from(recurringTransaction)
-    .where(eq(recurringTransaction.id, id));
-
-  return result[0] ?? null;
-}
-
-//function to get all recurring transactions
-export async function getAllRecurring(tx: any = db) {
-  return await tx.select().from(recurringTransaction);
-}
-
-
-//function to update a recurring transaction
-export async function updateRecurring(
-  id: string,
-  data: UpdateRecurring,
-  tx: any = db
-) {
-  await tx
-    .update(recurringTransaction)
-    .set({
-      transactionId: data.transactionId,
-      frequency: data.frequency,
-      nextRun: data.nextRun,
-      lastRun: data.lastRun,
-      isActive: data.isActive,
-      updatedAt: Date.now(),
-    })
-    .where(eq(recurringTransaction.id, id));
-}
-
-//function to delete a recurring transaction
-export async function deleteRecurring(id: string, tx: any = db) {
-  await tx
-    .delete(recurringTransaction)
-    .where(eq(recurringTransaction.id, id));
-}
-
-//function to get due recurring transactions
-export async function getDueRecurringTransactions(tx: any = db) {
-  const now = Date.now();
-
-  return await tx
-    .select()
-    .from(recurringTransaction)
-    .where(
-      eq(
-        recurringTransaction.isActive,
-        true
-      )
-    );
-}
+import { db } from "../index";
+type RecurringInput={transactionId:string;frequency:string;nextRun:number;lastRun?:number;isActive:boolean};
+const columns="id,transaction_id AS transactionId,frequency,next_run AS nextRun,last_run AS lastRun,is_active AS isActive,created_at AS createdAt,updated_at AS updatedAt";
+export async function createRecurring(data:RecurringInput,tx:any=db){try{const now=Date.now();await tx.runAsync("INSERT INTO recurring_transactions (id,transaction_id,frequency,next_run,last_run,is_active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)",randomUUID(),data.transactionId,data.frequency,data.nextRun,data.lastRun??null,data.isActive?1:0,now,now);}catch(error){throw new Error(`Unable to create recurring transaction: ${String(error)}`);}}
+export async function getRecurringById(id:string,tx:any=db){try{return await tx.getFirstAsync(`SELECT ${columns} FROM recurring_transactions WHERE id=?`,id);}catch(error){throw new Error(`Unable to fetch recurring transaction: ${String(error)}`);}}
+export async function getAllRecurring(tx:any=db){try{return await tx.getAllAsync(`SELECT ${columns} FROM recurring_transactions ORDER BY next_run`);}catch(error){throw new Error(`Unable to fetch recurring transactions: ${String(error)}`);}}
+export async function updateRecurring(id:string,data:RecurringInput,tx:any=db){try{await tx.runAsync("UPDATE recurring_transactions SET transaction_id=?,frequency=?,next_run=?,last_run=?,is_active=?,updated_at=? WHERE id=?",data.transactionId,data.frequency,data.nextRun,data.lastRun??null,data.isActive?1:0,Date.now(),id);}catch(error){throw new Error(`Unable to update recurring transaction: ${String(error)}`);}}
+export async function deleteRecurring(id:string,tx:any=db){try{await tx.runAsync("DELETE FROM recurring_transactions WHERE id=?",id);}catch(error){throw new Error(`Unable to delete recurring transaction: ${String(error)}`);}}
+export async function getDueRecurringTransactions(tx:any=db){try{return await tx.getAllAsync(`SELECT ${columns} FROM recurring_transactions WHERE is_active=1 AND next_run<=?`,Date.now());}catch(error){throw new Error(`Unable to fetch due recurring transactions: ${String(error)}`);}}

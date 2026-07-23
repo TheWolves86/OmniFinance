@@ -1,118 +1,35 @@
-import { createCategory, getCategoryCount } from "./repository/category";
-import { createAccount, getAccountCount } from "./repository/account";
+import { db } from "./index";
+import { createAccount } from "./repository/account";
+import { createCategory } from "./repository/category";
 
-const defaultExpenseCategories = [
-    {
-        name: "Food & Drinks",
-        icon: "fast-food-outline",
-    },
-    {
-        name: "Transportation",
-        icon: "car-outline",
-    },
-    {
-        name: "Croceries",
-        icon: "basket-outline"
-    },
-    {
-        name: "Utilities",
-        icon: "flash-outline"
-    },
-    {
-        name: "Housing",
-        icon: "home-outline"
-    },
-    {
-        name: "Personal Care",
-        icon: "heart-outline"
-    },
-    {
-        name: "Savings",
-        icon: "wallet-outline"
-    },
-    {
-        name: "Entertainment",
-        icon: "film-outlinel"
-    },
-    {
-        name: "Miscellaneous",
-        icon: "cube-outline"
-    },
-    {
-        name: "Others",
-        icon: "ellipsis-horizontal-circle-outline"
+const expenseCategories = [
+  ["Food & Drinks", "fast-food-outline"], ["Transportation", "car-outline"],
+  ["Groceries", "basket-outline"], ["Utilities", "flash-outline"],
+  ["Housing", "home-outline"], ["Personal Care", "heart-outline"],
+  ["Savings", "wallet-outline"], ["Entertainment", "film-outline"],
+  ["Miscellaneous", "cube-outline"], ["Other", "ellipsis-horizontal-circle-outline"],
+] as const;
+const incomeCategories = [
+  ["Salary", "cash-outline"], ["Freelance", "laptop-outline"],
+  ["Business", "briefcase-outline"], ["Investment", "trending-up-outline"],
+  ["Interest", "stats-chart-outline"], ["Gift", "gift-outline"],
+  ["Refund", "refresh-outline"], ["Other", "ellipsis-horizontal-circle-outline"],
+] as const;
+
+export async function seedDatabase(): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    const categoryCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM categories");
+    if (!categoryCount?.count) {
+      for (const [name, icon] of expenseCategories) {
+        await createCategory({ name, icon, color: "#4caf50", type: "expense", isDefault: true });
+      }
+      for (const [name, icon] of incomeCategories) {
+        await createCategory({ name, icon, color: "#2196f3", type: "income", isDefault: true });
+      }
     }
-];
-
-const defaultIncomeCategories = [
-    {
-        name: "Salary",
-        icon: "cash-outline"
-    },
-    {
-        name: "Freelance",
-        icon: "laptop-outline"
-    },
-    {
-        name: "Business",
-        icon: "briefcase-outline"
-    },
-    {
-        name: "Investment",
-        icon: "trending-up-outline"
-    },
-    {
-        name: "Interest",
-        icon: "stats-chart-outline"
-    },
-    {
-        name: "Refund",
-        icon: "refresh-outline"
-    },
-    {
-        name: "Other",
-        icon: "ellipsis-horizontal-circle-outline"
+    const accountCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM accounts");
+    if (!accountCount?.count) {
+      await createAccount({ name: "Cash", type: "cash", balance: 0, currency: "INR", icon: "wallet-outline", color: "#34C759", isDefault: true });
     }
-];
-
-export async function seedDatabase() {
-    const CategoryCount = await getCategoryCount();
-    if (CategoryCount === 0) {
-        console.log("🌱 Seeding default categories...");
-
-    for (const category of defaultExpenseCategories) {
-      await createCategory({
-        ...category,
-        type: "expense",
-        isDefault: true,
-        color: "#4caf50",
-      });
-    }
-
-    for (const category of defaultIncomeCategories) {
-        await createCategory ({
-            ...category,
-            type: "income",
-            isDefault: true,
-            color: "#2196f3",
-        })
-    }
-    console.log("🌱 Default categories seeded successfully!");
-}
-    const accountCount = await getAccountCount();
-    if (accountCount === 0) {
-        console.log("🌱 Seeding Cash accounts...");
-
-        await createAccount({
-            name: "Cash",
-            type: "cash",
-            balance: 0,
-            currency: "INR",
-            icon: "wallet-outline",
-            color: "#34C759",
-            isDefault: true,
-        })
-
-        console.log("✅ Default account created");
-    }
+  });
 }

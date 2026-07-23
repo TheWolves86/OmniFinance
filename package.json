@@ -10,7 +10,6 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.1.0",
     "dayjs": "^1.11.21",
-    "drizzle-orm": "^0.45.2",
     "expo": "~56.0.16",
     "expo-camera": "~56.0.8",
     "expo-constants": "~56.0.20",
@@ -41,7 +40,6 @@
   "devDependencies": {
     "@types/react": "~19.2.2",
     "babel-preset-expo": "^56.0.17",
-    "drizzle-kit": "^0.31.10",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -49,7 +47,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "db:generate": "drizzle-kit generate"
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }

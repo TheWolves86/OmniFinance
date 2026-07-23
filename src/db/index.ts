@@ -1,7 +1,3 @@
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { openDatabaseSync} from "expo-sqlite"
-import * as schema from "./schema"
+import * as SQLite from "expo-sqlite";
 
-const sqLite = openDatabaseSync("omnifinance.db")
-
-export const db = drizzle(sqLite, { schema });
+export const db = SQLite.openDatabaseSync("omnifinance.db");
