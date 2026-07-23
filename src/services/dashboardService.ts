@@ -71,14 +71,11 @@ export async function getDashboardData(): Promise<DashboardData> {
                 ? 0
                 : (monthlyExpense / totalBudget) * 100;
 
-        const recentTransactions =
-            transactions
-                .sort(
-                (a: any, b: any) =>
-                    b.transactionDate -
-                    a.transactionDate
-                )
-                .slice(0, 5);
+        const recentTransactions = [...transactions]
+            .sort(
+                (a: any, b: any) => b.transactionDate - a.transactionDate
+            )
+            .slice(0, 5);
 
         return {
             totalBalance,
