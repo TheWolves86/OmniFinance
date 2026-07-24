@@ -1,38 +1,24 @@
-﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react"
+﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native"
+import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native";
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import { addTransaction } from "@/src/services/transactionService";
+import { getAllAccounts } from "@/src/db/repository/account";
+import { getExpenseCategories, getIncomeCategory } from "@/src/db/repository/category";
 
-const expenseCategories = [
-  {name: "Food & Drinks",icon: "fast-food-outline"},
-  {name: "Transportation",icon: "car-outline"},
-  {name: "Groceries",icon: "basket-outline"},
-  {name: "Utilities",icon: "flash-outline"},
-  {name: "Housing",icon: "home-outline"},
-  {name: "Personal Care",icon: "heart-outline"},
-  {name: "Entertainment",icon: "film-outline"},
-  {name: "Miscellaneous",icon: "cube-outline"},
-  {name: "Others",icon: "ellipsis-horizontal-circle-outline"}
-]
+type Account = {
+  id: string;
+  name: string
+}
 
-const incomeCategories = [
-  { name: "Salary", icon: "cash-outline" },
-  { name: "Freelance", icon: "laptop-outline" },
-  { name: "Business", icon: "briefcase-outline" },
-  { name: "Gift", icon: "gift-outline" },
-  { name: "Investment", icon: "trending-up-outline" },
-  { name: "Interest", icon: "stats-chart-outline" },
-  { name: "Refund", icon: "refresh-outline" },
-  { name: "Other", icon: "ellipsis-horizontal-circle-outline" },
-];
-
-const accounts = [
-  {id: "cash",name: "Cash"},
-  {id: "bank", name: "Bank"}
-]
+type Category = {
+  id: string;
+  name: string;
+  icon: string;
+}
 
 const COLORS = {
   background: "#F7F8FA",
@@ -62,31 +48,30 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [ title, setTitle ] = useState("")
   const [ amount, setAmount ] = useState("")
   const amountInputRef = useRef<React.ElementRef<typeof BottomSheetTextInput>>(null)
-  const [selectedCategory, setSelectedCategory] = useState("Food & Drinks")
-  const [selectedAccount, setSelectedAccount] = useState("cash")
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState("");
   const [transactionDate, setTransactionDate] = useState(new Date());
   const [notes, setNotes] = useState("");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
 
-  const displayedCategories =
-  transactionType === "income"
-    ? incomeCategories
-    : expenseCategories;
-
-  useEffect(() => {
-    const firstCategory = displayedCategories[0];
-
-    if (firstCategory) {
-      setSelectedCategory(firstCategory.name);
-    }
-  }, [transactionType]);
+  
 
   useEffect(() => {
     if (Platform.OS === "android") {
       UIManager.setLayoutAnimationEnabledExperimental?.(true);
     }
   }, []);
+
+  useEffect(() => {
+    loadAccounts();
+  }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [transactionType]);
 
   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === "android") {
@@ -103,6 +88,56 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     setIsNotesExpanded((current) => !current);
   };
 
+  async function loadAccounts(){
+    const data = await getAllAccounts();
+    setAccounts(data);
+    if (data.length > 0) {
+      setSelectedAccount(data[0].id);
+    }
+  }
+
+  async function loadCategories(){
+    const data = transactionType === "income" ? await getIncomeCategory() : await getExpenseCategories();
+    setCategories(data);
+
+    if (data.length > 0){
+      setSelectedCategory(data[0].id);
+    }
+  }
+
+  const handleSave = async () => {
+    if (!amount){
+      alert("Enter an amount")
+      return;
+    }
+    if (!selectedAccount){
+      alert("Select an account")
+      return;
+    }
+    if (!selectedCategory){
+      alert("Select a category")
+      return;
+    }
+
+    try {
+      await addTransaction({
+        title: title,
+        amount: Number(amount),
+        type: transactionType,
+        categoryId: selectedCategory,
+        accountId: selectedAccount,
+        note: notes,
+        transactionDate: transactionDate.getTime()
+      })
+
+      setAmount("");
+      setNotes("");
+
+      (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+    } catch (error) {
+      console.error(error)
+    }
+  }
   const formattedDate = transactionDate.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -121,7 +156,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable>
+          <Pressable onPress={() => (ref as React.RefObject<BottomSheetModal>).current?.dismiss()}>
             <Text style={styles.cancel}>Cancel</Text>
           </Pressable>
 
@@ -129,7 +164,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             New Transaction
           </Text>
 
-          <Pressable>
+          <Pressable onPress={handleSave}>
             <Text style={styles.save}>Save</Text>
           </Pressable>
         </View>
@@ -187,11 +222,11 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             Category
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryContainer}>
-            {displayedCategories.map((item) => {
-              const selected = selectedCategory === item.name;
+            {categories.map((item) => {
+              const selected = selectedCategory === item.id;
 
               return (
-                <Pressable key={item.name} onPress={() => setSelectedCategory(item.name)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
+                <Pressable key={item.name} onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
                   <View style={[styles.iconContainer, selected && styles.selectedIconContainer]}>
                     <Ionicons name={item.icon as any} size={20} color={selected ? "#FFFFFF" : "#606A7B"}/>
                   </View>
@@ -471,3 +506,4 @@ const styles = StyleSheet.create({
     backgroundColor: "#ECEEF2",
   },
 });
+//

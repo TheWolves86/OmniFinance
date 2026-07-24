@@ -14,7 +14,7 @@ export async function initializeDatabase(): Promise<void> {
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       balance REAL NOT NULL,
-      curreny TEXT NOT NULL,
+      currency TEXT NOT NULL,
       icon TEXT,
       color TEXT,
       is_default INTEGER NOT NULL,
@@ -134,7 +134,7 @@ export async function initializeDatabase(): Promise<void> {
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
-    CREATE TABLE IF NOT EXISTS settigs (
+    CREATE TABLE IF NOT EXISTS settings (
       id INTEGER PRIMARY KEY NOT NULL,
       currency TEXT NOT NULL,
       theme TEXT NOT NULL,
