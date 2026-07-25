@@ -1,0 +1,24 @@
+Activity Screen
+
+│
+├── Top Bar
+│     ├── App Logo
+│     ├── OmniFinance
+│     └── Notification Icon
+│
+├── Transactions Title
+│
+├── Search Bar
+│     ├── Search Icon
+│     ├── TextInput
+│     └── Filter Button
+│
+├── SectionList
+│     ├── Today
+│     │      └── Transaction Card
+│     │
+│     ├── Yesterday
+│     │      └── Transaction Card
+│     │
+│     └── Older
+│            └── Transaction Card
