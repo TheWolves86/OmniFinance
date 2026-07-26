@@ -31,7 +31,7 @@ const Gemini = () => {
 
         router.replace("/(tabs)/dashboard")
       } catch (error) {
-        console.error("Error saving API key. Please check your storage settings.");
+        console.error("Error saving API key: [REDACTED]");
         Alert.alert("Error", "Could not save the API key.");
       }
     }
