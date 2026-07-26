@@ -154,6 +154,7 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(is_completed);
     CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(status);
     CREATE INDEX IF NOT EXISTS idx_recurring_next_run ON recurring_transactions(next_run);
+    CREATE INDEX IF NOT EXISTS idx_budgets_month_year ON budgets(month, year);
   `);
 
   initialized = true;

@@ -17,19 +17,24 @@ const incomeCategories = [
 ] as const;
 
 export async function seedDatabase(): Promise<void> {
-  await db.withTransactionAsync(async () => {
-    const categoryCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM categories");
-    if (!categoryCount?.count) {
-      for (const [name, icon] of expenseCategories) {
-        await createCategory({ name, icon, color: "#4caf50", type: "expense", isDefault: true });
+  try {
+    await db.withTransactionAsync(async () => {
+      const categoryCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM categories");
+      if (!categoryCount?.count) {
+        for (const [name, icon] of expenseCategories) {
+          await createCategory({ name, icon, color: "#4caf50", type: "expense", isDefault: true });
+        }
+        for (const [name, icon] of incomeCategories) {
+          await createCategory({ name, icon, color: "#2196f3", type: "income", isDefault: true });
+        }
       }
-      for (const [name, icon] of incomeCategories) {
-        await createCategory({ name, icon, color: "#2196f3", type: "income", isDefault: true });
+      const accountCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM accounts");
+      if (!accountCount?.count) {
+        await createAccount({ name: "Cash", type: "cash", balance: 0, currency: "INR", icon: "wallet-outline", color: "#34C759", isDefault: true });
       }
-    }
-    const accountCount = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM accounts");
-    if (!accountCount?.count) {
-      await createAccount({ name: "Cash", type: "cash", balance: 0, currency: "INR", icon: "wallet-outline", color: "#34C759", isDefault: true });
-    }
-  });
+    });
+  } catch (error) {
+    console.error("Error seeding database:", error);
+    throw error;
+  }
 }
