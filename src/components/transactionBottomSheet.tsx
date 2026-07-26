@@ -3,7 +3,7 @@ import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetT
 import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native";
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, FlatList } from "react-native-gesture-handler";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { addTransaction } from "@/src/services/transactionService";
 import { getAllAccounts } from "@/src/db/repository/account";
@@ -221,12 +221,17 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
           <Text style={styles.sectionTitle}>
             Category
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryContainer}>
-            {categories.map((item) => {
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryContainer}
+            data={categories}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => {
               const selected = selectedCategory === item.id;
 
               return (
-                <Pressable key={item.name} onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
+                <Pressable onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
                   <View style={[styles.iconContainer, selected && styles.selectedIconContainer]}>
                     <Ionicons name={item.icon as any} size={20} color={selected ? "#FFFFFF" : "#606A7B"}/>
                   </View>
@@ -235,27 +240,32 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                   </Text>
                 </Pressable>
               )
-            })}
-          </ScrollView>
+            }}
+          />
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             Accounts
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.accountContainer}>
-            {accounts.map((account) => {
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.accountContainer}
+            data={accounts}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: account }) => {
               const selected = selectedAccount === account.id;
 
               return (
-                <Pressable key={account.id} onPress={() => setSelectedAccount(account.id)}
+                <Pressable onPress={() => setSelectedAccount(account.id)}
                 style={[styles.accountChip, selected && styles.selectedAccountChip]}>
                   <Text style={[styles.accountText, selected && styles.selectedAccountText]}>
                     {account.name}
                   </Text>
                 </Pressable>
               )
-            })}
-          </ScrollView>
+            }}
+          />
         </View>
         <View style={styles.section}>
           <Pressable style={styles.detailRow} onPress={() => setIsDatePickerOpen(true)}>
