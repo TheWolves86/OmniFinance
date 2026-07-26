@@ -1,0 +1,98 @@
+AddTransactionBottomSheet<BottomSheetModal>
+|
+|----BottomSheetScrollView
+      |
+      |----Header<View>
+      |      |
+      |      |----CancelButton<Pressable>
+      |      |      |
+      |      |      |----CancelText<Text>
+      |      |
+      |      |----Title<Text>
+      |      |
+      |      |----SaveButton<Pressable>
+      |             |
+      |             |----SaveText<Text>
+      |
+      |----TransactionType<View>
+      |      |
+      |      |----SwitchSelector
+      |             |
+      |             |----IncomeOption
+      |             |----ExpenseOption
+      |
+      |----AmountSection<View>
+      |      |
+      |      |----AmountLabel<Text>
+      |      |
+      |      |----AmountRow<Pressable>
+      |             |
+      |             |----CurrencySymbol<Text>
+      |             |
+      |             |----AmountInput<BottomSheetTextInput>
+      |
+      |----CategorySection<View>
+      |      |
+      |      |----SectionTitle<Text>
+      |      |
+      |      |----CategoryScroll<ScrollView>
+      |             |
+      |             |----CategoryCard<Pressable>
+      |             |      |
+      |             |      |----IconContainer<View>
+      |             |      |      |
+      |             |      |      |----CategoryIcon<Ionicons>
+      |             |      |
+      |             |      |----CategoryName<Text>
+      |             |
+      |             |----CategoryCard<Pressable>
+      |             |----CategoryCard<Pressable>
+      |             |----...
+      |
+      |----AccountSection<View>
+      |      |
+      |      |----SectionTitle<Text>
+      |      |
+      |      |----AccountScroll<ScrollView>
+      |             |
+      |             |----AccountChip<Pressable>
+      |             |      |
+      |             |      |----AccountName<Text>
+      |             |
+      |             |----AccountChip<Pressable>
+      |             |----...
+      |
+      |----DetailsSection<View>
+             |
+             |----DateRow<Pressable>
+             |      |
+             |      |----LeftSection<View>
+             |      |      |
+             |      |      |----CalendarIcon<Ionicons>
+             |      |      |----DateLabel<Text>
+             |      |
+             |      |----RightSection<View>
+             |             |
+             |             |----SelectedDate<Text>
+             |             |----Chevron<Ionicons>
+             |
+             |----DatePicker<DateTimePicker>
+             |      (Visible when opened)
+             |
+             |----Divider<View>
+             |
+             |----NotesRow<Pressable>
+             |      |
+             |      |----LeftSection<View>
+             |      |      |
+             |      |      |----NotesIcon<Ionicons>
+             |      |      |----NotesLabel<Text>
+             |      |
+             |      |----RightSection<View>
+             |             |
+             |             |----Preview<Text>
+             |             |----Chevron<Ionicons>
+             |
+             |----NotesContainer<View>
+                    |
+                    |----NotesInput<BottomSheetTextInput>
