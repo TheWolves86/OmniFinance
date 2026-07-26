@@ -3,7 +3,7 @@ import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetT
 import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native";
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ScrollView, FlatList } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { addTransaction } from "@/src/services/transactionService";
 import { getAllAccounts } from "@/src/db/repository/account";
@@ -222,14 +222,13 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             Category
           </Text>
           <FlatList
+            data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryContainer}
-            data={categories}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               const selected = selectedCategory === item.id;
-
               return (
                 <Pressable onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
                   <View style={[styles.iconContainer, selected && styles.selectedIconContainer]}>
@@ -239,7 +238,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                     {item.name}
                   </Text>
                 </Pressable>
-              )
+              );
             }}
           />
         </View>
@@ -248,14 +247,13 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             Accounts
           </Text>
           <FlatList
+            data={accounts}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.accountContainer}
-            data={accounts}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(account) => account.id}
             renderItem={({ item: account }) => {
               const selected = selectedAccount === account.id;
-
               return (
                 <Pressable onPress={() => setSelectedAccount(account.id)}
                 style={[styles.accountChip, selected && styles.selectedAccountChip]}>
@@ -263,7 +261,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                     {account.name}
                   </Text>
                 </Pressable>
-              )
+              );
             }}
           />
         </View>
