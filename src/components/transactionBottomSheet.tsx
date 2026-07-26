@@ -1,6 +1,6 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet} from "react-native";
+import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FlatList } from "react-native-gesture-handler";
@@ -222,15 +222,15 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             Category
           </Text>
           <FlatList
-            data={categories}
+            data={displayedCategories}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryContainer}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.name}
             renderItem={({ item }) => {
-              const selected = selectedCategory === item.id;
+              const selected = selectedCategory === item.name;
               return (
-                <Pressable onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
+                <Pressable onPress={() => setSelectedCategory(item.name)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
                   <View style={[styles.iconContainer, selected && styles.selectedIconContainer]}>
                     <Ionicons name={item.icon as any} size={20} color={selected ? "#FFFFFF" : "#606A7B"}/>
                   </View>
@@ -238,7 +238,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                     {item.name}
                   </Text>
                 </Pressable>
-              );
+              )
             }}
           />
         </View>
@@ -251,17 +251,16 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.accountContainer}
-            keyExtractor={(account) => account.id}
+            keyExtractor={(item) => item.id}
             renderItem={({ item: account }) => {
               const selected = selectedAccount === account.id;
               return (
-                <Pressable onPress={() => setSelectedAccount(account.id)}
-                style={[styles.accountChip, selected && styles.selectedAccountChip]}>
+                <Pressable onPress={() => setSelectedAccount(account.id)} style={[styles.accountChip, selected && styles.selectedAccountChip]}>
                   <Text style={[styles.accountText, selected && styles.selectedAccountText]}>
                     {account.name}
                   </Text>
                 </Pressable>
-              );
+              )
             }}
           />
         </View>
