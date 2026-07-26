@@ -5,9 +5,10 @@ import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { addTransaction } from "@/src/services/transactionService";
+import { addTransaction, editTransactionService } from "@/src/services/transactionService";
 import { getAllAccounts } from "@/src/db/repository/account";
 import { getExpenseCategories, getIncomeCategory } from "@/src/db/repository/category";
+import { subscribeTransactionSheet, dismissTransactionSheet, emitTransactionChanged, registerTransactionSheet, TransactionSheetPayload } from "@/src/components/transactionSheetController";
 
 type Account = {
   id: string;
@@ -30,6 +31,8 @@ const COLORS = {
 
 const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const snapPoints = useMemo(() => ["95%"], [])
+  const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
+  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
 
   const renderBackDrop = useCallback(
     (backdropProps: any) => (
@@ -67,12 +70,44 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   }, []);
 
   useEffect(() => {
+    registerTransactionSheet(ref as BottomSheetModal | null);
+    return () => registerTransactionSheet(null);
+  }, [ref]);
+
+  useEffect(() => {
     loadAccounts();
   }, []);
 
   useEffect(() => {
     loadCategories();
   }, [transactionType]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeTransactionSheet((payload: TransactionSheetPayload) => {
+      if (payload.mode === "edit" && payload.transaction) {
+        const transactionTypeValue = payload.transaction.type === "income" ? "income" : "expense";
+        setSheetMode("edit");
+        setEditingTransactionId(payload.transaction.id);
+        setTitle(payload.transaction.title || "");
+        setAmount(String(payload.transaction.amount ?? ""));
+        setTransactionType(transactionTypeValue);
+        setSelectedCategory("");
+        setSelectedAccount("");
+        setNotes(payload.transaction.note || "");
+        setTransactionDate(new Date(payload.transaction.transactionDate ?? Date.now()));
+        setIsDatePickerOpen(false);
+        setIsNotesExpanded(Boolean(payload.transaction.note));
+        void loadAccounts(payload.transaction.accountId);
+        void loadCategories(false, transactionTypeValue, payload.transaction.categoryId);
+      } else {
+        setSheetMode("create");
+        setEditingTransactionId(null);
+        resetForm();
+      }
+    });
+
+    return unsubscribe;
+  }, []);
 
   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === "android") {
@@ -89,28 +124,32 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     setIsNotesExpanded((current) => !current);
   };
 
-  async function loadAccounts(selectFirst = true){
+  async function loadAccounts(preselectedId?: string){
     const data = await getAllAccounts();
     setAccounts(data);
-    if (selectFirst && data.length > 0) {
-      setSelectedAccount(data[0].id);
-    } else if (!selectFirst) {
-      setSelectedAccount("");
-    }
+    const matchedAccount = preselectedId && data.some((account) => account.id === preselectedId)
+      ? preselectedId
+      : data.length > 0 ? data[0].id : "";
+    setSelectedAccount(matchedAccount);
   }
 
-  async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType){
+  async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
     const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
     setCategories(data);
+    const matchedCategory = preselectedId && data.some((category) => category.id === preselectedId)
+      ? preselectedId
+      : data.length > 0 ? data[0].id : "";
 
-    if (selectFirst && data.length > 0){
-      setSelectedCategory(data[0].id);
-    } else if (!selectFirst) {
+    if (selectFirst || preselectedId) {
+      setSelectedCategory(matchedCategory);
+    } else {
       setSelectedCategory("");
     }
   }
 
   const resetForm = () => {
+    setSheetMode("create");
+    setEditingTransactionId(null);
     setTransactionType("expense");
     setTitle("");
     setAmount("");
@@ -120,7 +159,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     setNotes("");
     setIsDatePickerOpen(false);
     setIsNotesExpanded(false);
-    void loadAccounts(false);
+    void loadAccounts();
     void loadCategories(false, "expense");
   };
 
@@ -152,18 +191,31 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     }
 
     try {
-      await addTransaction({
-        title: trimmedTitle,
-        amount: numericAmount,
-        type: transactionType,
-        categoryId: selectedCategory,
-        accountId: selectedAccount,
-        note: notes,
-        transactionDate: transactionDate.getTime()
-      })
+      if (sheetMode === "edit" && editingTransactionId) {
+        await editTransactionService(editingTransactionId, {
+          title: trimmedTitle,
+          amount: numericAmount,
+          type: transactionType,
+          categoryId: selectedCategory,
+          accountId: selectedAccount,
+          note: notes,
+          transactionDate: transactionDate.getTime()
+        });
+      } else {
+        await addTransaction({
+          title: trimmedTitle,
+          amount: numericAmount,
+          type: transactionType,
+          categoryId: selectedCategory,
+          accountId: selectedAccount,
+          note: notes,
+          transactionDate: transactionDate.getTime()
+        });
+      }
 
+      emitTransactionChanged();
       resetForm();
-      (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+      dismissTransactionSheet();
     } catch (error) {
       console.error(error)
     }
@@ -192,11 +244,11 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
           </Pressable>
 
           <Text style={styles.title}>
-            New Transaction
+            {sheetMode === "edit" ? "Edit Transaction" : "New Transaction"}
           </Text>
 
           <Pressable onPress={handleSave}>
-            <Text style={styles.save}>Save</Text>
+            <Text style={styles.save}>{sheetMode === "edit" ? "Update" : "Save"}</Text>
           </Pressable>
         </View>
         <View style={styles.switchContainer}>

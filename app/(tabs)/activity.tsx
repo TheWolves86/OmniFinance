@@ -2,12 +2,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, StyleSheet, Pressable, TextInput, SectionList } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllTransaction } from "@/src/db/repository/transaction";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import TransactionDetailsSheet from "@/src/components/transactionDetailsSheet";
+import { presentTransactionSheet, subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
 
 export default function ActivityPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const detailsSheetRef = React.useRef<BottomSheetModal>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
   const loadTransactions = useCallback(async () => {
     try {
@@ -23,6 +28,14 @@ export default function ActivityPage() {
       loadTransactions();
     }, [loadTransactions])
   );
+
+  useEffect(() => {
+    const unsubscribe = subscribeTransactionRefresh(() => {
+      loadTransactions();
+    });
+
+    return unsubscribe;
+  }, [loadTransactions]);
 
   const normalizedSearch = search.trim().toLowerCase();
   const filteredTransactions = transactions.filter((item) => {
@@ -131,7 +144,10 @@ export default function ActivityPage() {
           const typeColor = item?.type === "income" ? "#0F9D58" : "#EF4444";
 
           return (
-            <Pressable style={styles.transactionCard}>
+            <Pressable style={styles.transactionCard} onPress={() => {
+              setSelectedTransaction(item);
+              detailsSheetRef.current?.present();
+            }}>
               <View style={styles.transactionRow}>
                 <View style={styles.transactionInfo}>
                   <Text style={styles.transactionTitle}>{displayTitle}</Text>
@@ -143,6 +159,20 @@ export default function ActivityPage() {
               </View>
             </Pressable>
           );
+        }}
+      />
+      <TransactionDetailsSheet
+        ref={detailsSheetRef}
+        transaction={selectedTransaction}
+        onEdit={(transaction) => {
+          presentTransactionSheet({ mode: "edit", transaction });
+          detailsSheetRef.current?.dismiss();
+        }}
+        onDelete={(transaction) => {
+          if (transaction?.id) {
+            detailsSheetRef.current?.dismiss();
+            presentTransactionSheet({ mode: "create" });
+          }
         }}
       />
     </SafeAreaView>
@@ -276,3 +306,4 @@ const styles = StyleSheet.create({
     fontSize: 14
   }
 });
+//waah yaar 
