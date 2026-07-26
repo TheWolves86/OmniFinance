@@ -47,6 +47,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [ transactionType, setTransactionType ] = useState<"income" | "expense">("expense")
   const [ title, setTitle ] = useState("")
   const [ amount, setAmount ] = useState("")
+  const titleInputRef = useRef<React.ElementRef<typeof BottomSheetTextInput>>(null)
   const amountInputRef = useRef<React.ElementRef<typeof BottomSheetTextInput>>(null)
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -88,26 +89,57 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     setIsNotesExpanded((current) => !current);
   };
 
-  async function loadAccounts(){
+  async function loadAccounts(selectFirst = true){
     const data = await getAllAccounts();
     setAccounts(data);
-    if (data.length > 0) {
+    if (selectFirst && data.length > 0) {
       setSelectedAccount(data[0].id);
+    } else if (!selectFirst) {
+      setSelectedAccount("");
     }
   }
 
-  async function loadCategories(){
-    const data = transactionType === "income" ? await getIncomeCategory() : await getExpenseCategories();
+  async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType){
+    const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
     setCategories(data);
 
-    if (data.length > 0){
+    if (selectFirst && data.length > 0){
       setSelectedCategory(data[0].id);
+    } else if (!selectFirst) {
+      setSelectedCategory("");
     }
   }
 
+  const resetForm = () => {
+    setTransactionType("expense");
+    setTitle("");
+    setAmount("");
+    setSelectedCategory("");
+    setSelectedAccount("");
+    setTransactionDate(new Date());
+    setNotes("");
+    setIsDatePickerOpen(false);
+    setIsNotesExpanded(false);
+    void loadAccounts(false);
+    void loadCategories(false, "expense");
+  };
+
+  const handleTypeChange = (value: "income" | "expense") => {
+    setTransactionType(value);
+    setSelectedCategory("");
+    void loadCategories(false, value);
+  };
+
   const handleSave = async () => {
-    if (!amount){
-      alert("Enter an amount")
+    const trimmedTitle = title.trim();
+    const numericAmount = Number(amount);
+
+    if (!trimmedTitle) {
+      alert("Please enter a transaction title")
+      return;
+    }
+    if (!amount || Number.isNaN(numericAmount) || numericAmount <= 0) {
+      alert("Please enter a valid amount")
       return;
     }
     if (!selectedAccount){
@@ -121,8 +153,8 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
 
     try {
       await addTransaction({
-        title: title,
-        amount: Number(amount),
+        title: trimmedTitle,
+        amount: numericAmount,
         type: transactionType,
         categoryId: selectedCategory,
         accountId: selectedAccount,
@@ -130,9 +162,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         transactionDate: transactionDate.getTime()
       })
 
-      setAmount("");
-      setNotes("");
-
+      resetForm();
       (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     } catch (error) {
       console.error(error)
@@ -150,6 +180,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       snapPoints={snapPoints}
       backdropComponent={renderBackDrop}
       enablePanDownToClose
+      onDismiss={resetForm}
       handleIndicatorStyle={styles.handle}
       backgroundStyle={styles.background}>
       <BottomSheetScrollView
@@ -180,7 +211,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             buttonColor="#ffffff"
             backgroundColor="#F1F3F6"
             hasPadding
-            onPress={(value: any) => setTransactionType(value as "expense" | "income")}
+            onPress={(value: any) => handleTypeChange(value as "expense" | "income")}
             options={[
               {
                 label: "Income",
@@ -191,6 +222,20 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
                 value: "expense"
               }
             ]}/>
+        </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.amountLabel}>
+            TITLE
+          </Text>
+          <BottomSheetTextInput
+            ref={titleInputRef}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Transaction title"
+            placeholderTextColor="#A1A8B5"
+            cursorColor="#0B1D3A"
+            style={styles.titleInput}
+          />
         </View>
         <View style={styles.amountContainer}>
           <Text style={styles.amountLabel}>
@@ -358,6 +403,10 @@ const styles = StyleSheet.create({
   switchContainer: {
     marginBottom: 28,
   },
+  titleContainer: {
+    marginBottom: 24,
+    width: "100%"
+  },
   amountContainer: {
     alignItems: 'center',
     marginBottom: 28
@@ -368,6 +417,16 @@ const styles = StyleSheet.create({
     color: "#8A93A6",
     letterSpacing: 1,
     marginBottom: 10
+  },
+  titleInput: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: COLORS.navy
   },
   amountRow: {
     flexDirection: "row",
