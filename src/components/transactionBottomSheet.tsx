@@ -3,7 +3,7 @@ import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetT
 import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FlatList } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { addTransaction, editTransactionService } from "@/src/services/transactionService";
 import { getAllAccounts } from "@/src/db/repository/account";
@@ -13,13 +13,13 @@ import { subscribeTransactionSheet, dismissTransactionSheet, emitTransactionChan
 type Account = {
   id: string;
   name: string
-}
+};
 
 type Category = {
   id: string;
   name: string;
   icon: string;
-}
+};
 
 const COLORS = {
   background: "#F7F8FA",
@@ -27,7 +27,7 @@ const COLORS = {
   navy: "#0B1D3A",
   gray: "#6B7280",
   border: "#E8ECF2"
-}
+};
 
 const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const snapPoints = useMemo(() => ["95%"], [])
@@ -60,7 +60,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [notes, setNotes] = useState("");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-
+  const modalRef = useRef<BottomSheetModal>(null);
   
 
   useEffect(() => {
@@ -70,9 +70,9 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   }, []);
 
   useEffect(() => {
-    registerTransactionSheet(ref as BottomSheetModal | null);
+    registerTransactionSheet(modalRef.current);
     return () => registerTransactionSheet(null);
-  }, [ref]);
+  }, []);
 
   useEffect(() => {
     loadAccounts();
@@ -127,7 +127,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   async function loadAccounts(preselectedId?: string){
     const data = await getAllAccounts();
     setAccounts(data);
-    const matchedAccount = preselectedId && data.some((account) => account.id === preselectedId)
+    const matchedAccount = preselectedId && data.some((account: any) => account.id === preselectedId)
       ? preselectedId
       : data.length > 0 ? data[0].id : "";
     setSelectedAccount(matchedAccount);
@@ -136,7 +136,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
     const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
     setCategories(data);
-    const matchedCategory = preselectedId && data.some((category) => category.id === preselectedId)
+    const matchedCategory = preselectedId && data.some((category: any) => category.id === preselectedId)
       ? preselectedId
       : data.length > 0 ? data[0].id : "";
 
@@ -227,7 +227,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   });
   return (
     <BottomSheetModal
-      ref={ref}
+      ref={modalRef}
       index={0}
       snapPoints={snapPoints}
       backdropComponent={renderBackDrop}
@@ -319,15 +319,15 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             Category
           </Text>
           <FlatList
-            data={displayedCategories}
+            data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryContainer}
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => {
-              const selected = selectedCategory === item.name;
+              const selected = selectedCategory === item.id;
               return (
-                <Pressable onPress={() => setSelectedCategory(item.name)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
+                <Pressable onPress={() => setSelectedCategory(item.id)} style={[styles.categoryCard, selected && styles.selectedCtaegoryCard]}>
                   <View style={[styles.iconContainer, selected && styles.selectedIconContainer]}>
                     <Ionicons name={item.icon as any} size={20} color={selected ? "#FFFFFF" : "#606A7B"}/>
                   </View>
@@ -624,4 +624,3 @@ const styles = StyleSheet.create({
     backgroundColor: "#ECEEF2",
   },
 });
-//
