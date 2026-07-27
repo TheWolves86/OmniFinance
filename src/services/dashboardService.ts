@@ -3,6 +3,7 @@ import { getAllTransaction } from "@/src/db/repository/transaction";
 import { getAllGoals } from "@/src/db/repository/goal";
 import { getAllBudgets } from "@/src/db/repository/budget";
 
+//TODO: Check the dashboard.ts in the repository folder and remove things from thsi and that file so we dont have duplicate functions
 export type DashboardData = {
     totalBalance: number;
     monthlyIncome: number;
