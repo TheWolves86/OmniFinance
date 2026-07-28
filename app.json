@@ -21,6 +21,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "omnifinance",
     "plugins": [
       "expo-router",
       "expo-status-bar",

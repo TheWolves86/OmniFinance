@@ -1,6 +1,6 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { LayoutAnimation, Platform, UIManager, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
+import { LayoutAnimation, Platform, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
@@ -62,12 +62,6 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const modalRef = useRef<BottomSheetModal>(null);
   
-
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      UIManager.setLayoutAnimationEnabledExperimental?.(true);
-    }
-  }, []);
 
   useEffect(() => {
     registerTransactionSheet(modalRef.current);
