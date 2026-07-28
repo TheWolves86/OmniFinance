@@ -1,4 +1,4 @@
-﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect} from "react";
+﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect, useImperativeHandle } from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
 import { LayoutAnimation, Platform, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
 import SwitchSelector from "react-native-switch-selector"
@@ -61,7 +61,8 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const modalRef = useRef<BottomSheetModal>(null);
-  
+
+  useImperativeHandle(ref, () => modalRef.current as BottomSheetModal | null, [modalRef]);
 
   useEffect(() => {
     registerTransactionSheet(modalRef.current);

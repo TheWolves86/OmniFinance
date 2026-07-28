@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { getDashboardData, DashboardData } from '@/src/services/dashboardService'
+import { subscribeTransactionRefresh } from '@/src/components/transactionSheetController'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
@@ -10,6 +11,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboard()
+
+    const unsubscribe = subscribeTransactionRefresh(() => {
+      loadDashboard()
+    })
+
+    return unsubscribe
   }, [])
 
   async function loadDashboard() {
@@ -206,4 +213,4 @@ const styles = StyleSheet.create({
     color: '#7B8190',
   },
 })
-//bro india is where I live
+//here is what i recoomend
