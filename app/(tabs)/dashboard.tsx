@@ -7,6 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showBalance, setShowBalance] = useState(true);
 
   useEffect(() => {
     loadDashboard()
@@ -40,6 +41,19 @@ const Dashboard = () => {
           <Text style={styles.greeting}>Welcome Back 👋</Text>
           <Text style={styles.greetingSubtitle}>Here's your financial overview</Text>
         </View>
+      </View>
+      <View style={styles.balanceCard}>
+        <View style={styles.balanceHeader}>
+          <Text style={styles.balanceLabel}>
+            Total Balance
+          </Text>
+          <Pressable style={styles.eyeButton} onPress={() => setShowBalance(!showBalance)}>
+            <Ionicons name={showBalance ? "eye-outline" : "eye-off-outline"} size={20} color="#FFFFFF"/>
+          </Pressable>
+        </View>
+        <Text style={styles.balanceAmount}>
+         {showBalance ? `₹${(dashboardData?.totalBalance ?? 0).toLocaleString("en-IN")}` : "₹ ••••••"}
+        </Text>
       </View>
     </SafeAreaView>
   )
@@ -86,7 +100,7 @@ const styles = StyleSheet.create({
   },
   greetingContainer: {
     marginTop: 18,
-    marginBottom: 24,
+    marginBottom: 5,
   },
   greeting:{
     fontSize: 30,
@@ -97,5 +111,38 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 15,
     color: "#7B8190"
-  }
+  },
+  balanceCard: {
+    backgroundColor: "#0B1D3A",
+    borderRadius: 28,
+    padding: 24
+  },
+  balanceHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  balanceLabel: {
+    color: "#e4dde3",
+    fontSize: 15,
+    fontWeight: "600"
+  },
+  balanceAmount: {
+    fontSize: 40,
+    fontWeight: "800",
+    color: "#ffffff",
+    marginTop: 10
+  },
+  statsRow: {
+
+  },
+  eyeButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: "center",
+    alignItems: "center",
+    color: "#ffffff"
+  },
 })
+//
