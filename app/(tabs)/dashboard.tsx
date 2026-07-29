@@ -4,8 +4,10 @@ import { getDashboardData, DashboardData } from '@/src/services/dashboardService
 import { subscribeTransactionRefresh } from '@/src/components/transactionSheetController'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useRouter } from "expo-router"
 
 const Dashboard = () => {
+  const router = useRouter()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [showBalance, setShowBalance] = useState(true)
 
@@ -89,6 +91,9 @@ const Dashboard = () => {
           <Text style={styles.statSubtext}>This Month</Text>
         </View>
       </View>
+      <Pressable onPress={() => router.push('/accounts')}>
+        <Text>Go to accounts</Text>
+      </Pressable>
     </SafeAreaView>
   )
 }
