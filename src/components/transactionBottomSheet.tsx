@@ -62,7 +62,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const modalRef = useRef<BottomSheetModal>(null);
 
-  useImperativeHandle(ref, () => modalRef.current as unknown as BottomSheetModal, [modalRef]);
+  useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, [modalRef]);
 
   useEffect(() => {
     registerTransactionSheet(modalRef.current);
@@ -319,6 +319,11 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryContainer}
             keyExtractor={(item) => item.name}
+            getItemLayout={(data, index) => ({
+              length: 88, // 74 width + 14 marginRight
+              offset: 88 * index,
+              index,
+            })}
             renderItem={({ item }) => {
               const selected = selectedCategory === item.id;
               return (
@@ -344,6 +349,11 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.accountContainer}
             keyExtractor={(item) => item.id}
+            getItemLayout={(data, index) => ({
+              length: 100, // Approx width of chip + 10 marginRight
+              offset: 100 * index,
+              index,
+            })}
             renderItem={({ item: account }) => {
               const selected = selectedAccount === account.id;
               return (
