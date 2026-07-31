@@ -50,7 +50,7 @@ export async function getMonthlyExpense(){
 
         const row = await db.getFirstAsync<{ total: number}>(
             `
-            SELECTED
+            SELECT
                 COALESCE(SUM(amount), 0) AS total
             FROM transactions
             WHERE type= 'expense'
