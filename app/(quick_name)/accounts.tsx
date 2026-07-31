@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Pressable, TextInput, ScrollView} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
@@ -22,7 +22,9 @@ const Accounts = () => {
     }
   }
 
-  const filteredAccounts = accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
+  const filteredAccounts = useMemo(() => {
+    return accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
+  }, [accounts, search])
 
   const renderHeader = () => (
     <>
@@ -72,6 +74,11 @@ const Accounts = () => {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
+        getItemLayout={(data, index) => ({
+          length: 73, // Height of account card based on styling (approx)
+          offset: 73 * index,
+          index,
+        })}
         renderItem={({item}) => (
           <Pressable style={styles.accountCard}>
             <View style={styles.accountIcon}>

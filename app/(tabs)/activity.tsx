@@ -37,54 +37,56 @@ export default function ActivityPage() {
     return unsubscribe;
   }, [loadTransactions]);
 
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredTransactions = transactions.filter((item) => {
-    const displayTitle = item?.title?.trim() ? item.title : item?.categoryName || "";
-    return displayTitle.toLowerCase().includes(normalizedSearch);
-  });
-
-  const grouped = filteredTransactions.reduce((acc: any[], item: any) => {
-    const date = new Date(item?.transactionDate ?? Date.now());
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-
-    const transactionDay = new Date(date);
-    transactionDay.setHours(0, 0, 0, 0);
-
-    let sectionTitle = transactionDay.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+  const sortedGroups = React.useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const filteredTransactions = transactions.filter((item) => {
+      const displayTitle = item?.title?.trim() ? item.title : item?.categoryName || "";
+      return displayTitle.toLowerCase().includes(normalizedSearch);
     });
-    let sectionOrder = 2;
 
-    if (transactionDay.getTime() === today.getTime()) {
-      sectionTitle = "TODAY";
-      sectionOrder = 0;
-    } else if (transactionDay.getTime() === yesterday.getTime()) {
-      sectionTitle = "YESTERDAY";
-      sectionOrder = 1;
-    }
+    const grouped = filteredTransactions.reduce((acc: any[], item: any) => {
+      const date = new Date(item?.transactionDate ?? Date.now());
 
-    const existing = acc.find((section: any) => section.title === sectionTitle);
-    if (existing) {
-      existing.data.push(item);
-    } else {
-      acc.push({
-        title: sectionTitle,
-        data: [item],
-        order: sectionOrder,
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      const transactionDay = new Date(date);
+      transactionDay.setHours(0, 0, 0, 0);
+
+      let sectionTitle = transactionDay.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
-    }
+      let sectionOrder = 2;
 
-    return acc;
-  }, []);
+      if (transactionDay.getTime() === today.getTime()) {
+        sectionTitle = "TODAY";
+        sectionOrder = 0;
+      } else if (transactionDay.getTime() === yesterday.getTime()) {
+        sectionTitle = "YESTERDAY";
+        sectionOrder = 1;
+      }
 
-  const sortedGroups = grouped.sort((a, b) => a.order - b.order);
+      const existing = acc.find((section: any) => section.title === sectionTitle);
+      if (existing) {
+        existing.data.push(item);
+      } else {
+        acc.push({
+          title: sectionTitle,
+          data: [item],
+          order: sectionOrder,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return grouped.sort((a: any, b: any) => a.order - b.order);
+  }, [transactions, search]);
 
   return (
     <SafeAreaView style={styles.container}>
