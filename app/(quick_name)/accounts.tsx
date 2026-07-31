@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Pressable} from 'react-native'
+import { StyleSheet, Text, View, Pressable, TextInput, ScrollView} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
+import { FlatList } from 'react-native-gesture-handler';
 
 const Accounts = () => {
   const router = useRouter()
@@ -20,15 +21,80 @@ const Accounts = () => {
       console.error(error)
     }
   }
+
   const filteredAccounts = accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
-  return (
-    <SafeAreaView>
+
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="#0B1D3A" />
         </Pressable>
         <Text style={styles.heading}>Accounts</Text>
       </View>
+      <View style={styles.balanceCard}>
+        <Text style={styles.balanceLabel}>
+          TOTAL BALANCE
+        </Text>
+        <Text style={styles.balanceAmount}>
+          ₹{accounts.reduce((sum, account) => sum + account.balance, 0).toLocaleString("en-IN")}
+        </Text>
+        <Text style={styles.activeAccounts}>
+          • {accounts.length} Active Accounts
+        </Text>
+        <View style={styles.chartPlaceholder}>
+          {[32, 18, 24, 20, 38, 30, 42, 48].map((height, index) => (
+            <View
+              key={index}
+              style={[
+                styles.chartBar,
+                {
+                  height,
+                  backgroundColor:
+                    index === 7 ? "#0B1D3A" : "#D8DCE5",
+                },
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={18} color="#9CA3AF" />
+        <TextInput placeholder="Search Accounts..." value={search} onChangeText={setSearch} style={styles.searchInput} />
+      </View>
+    </>
+  )
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={filteredAccounts}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={styles.listContent}
+        renderItem={({item}) => (
+          <Pressable style={styles.accountCard}>
+            <View style={styles.accountIcon}>
+              <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12}}>
+              <Text style={styles.accountName}>
+                {item.name}
+              </Text>
+              <Text style={styles.accountType}>
+                {item.type}
+              </Text>
+            </View>
+            <Text style={styles.accountBalance}>
+              ₹{item.balance.toLocaleString("en-IN")}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color="#B0B6C3" />
+          </Pressable>
+        )}
+      />
+      <Pressable style={styles.fab}>
+          <Ionicons name="add" size={28} color="#FFFFFF" />
+      </Pressable>
     </SafeAreaView>
   )
 }
@@ -105,6 +171,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 15
   },
+  listContent: {
+    paddingBottom: 96
+  },
   accountCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -164,4 +233,3 @@ const styles = StyleSheet.create({
     elevation: 8,
   }
 })
-//

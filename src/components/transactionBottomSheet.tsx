@@ -62,7 +62,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const modalRef = useRef<BottomSheetModal>(null);
 
-  useImperativeHandle(ref, () => modalRef.current as BottomSheetModal | null, [modalRef]);
+  useImperativeHandle(ref, () => modalRef.current!, [modalRef]);
 
   useEffect(() => {
     registerTransactionSheet(modalRef.current);
