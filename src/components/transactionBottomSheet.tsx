@@ -1,6 +1,6 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect, useImperativeHandle } from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
-import { LayoutAnimation, Platform, View, Text, Pressable, StyleSheet, FlatList } from "react-native"
+import { LayoutAnimation, Platform, View, Text, Pressable, StyleSheet, FlatList, Alert} from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
@@ -169,19 +169,19 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     const numericAmount = Number(amount);
 
     if (!trimmedTitle) {
-      alert("Please enter a transaction title")
+      Alert.alert("Please enter a transaction title");
       return;
     }
     if (!amount || Number.isNaN(numericAmount) || numericAmount <= 0) {
-      alert("Please enter a valid amount")
+      Alert.alert("Please enter a valid amount");
       return;
     }
-    if (!selectedAccount){
-      alert("Select an account")
+    if (!selectedAccount) {
+      Alert.alert("Select an account");
       return;
     }
-    if (!selectedCategory){
-      alert("Select a category")
+    if (!selectedCategory) {
+      Alert.alert("Select a category");
       return;
     }
 

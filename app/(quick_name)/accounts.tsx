@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View, Pressable, TextInput, ScrollView} from 'react-native'
+import { StyleSheet, Text, View, Pressable, TextInput, FlatList} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
-import { FlatList } from 'react-native-gesture-handler';
+import { presentAccountSheet } from "@/src/components/accountSheetController"
 
 const Accounts = () => {
   const router = useRouter()
@@ -23,7 +23,7 @@ const Accounts = () => {
   }
 
   const filteredAccounts = accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
-
+  const hasAccounts = filteredAccounts.length > 0;
   const renderHeader = () => (
     <>
       <View style={styles.header}>
@@ -60,7 +60,7 @@ const Accounts = () => {
       </View>
       <View style={styles.searchBar}>
         <Ionicons name="search" size={18} color="#9CA3AF" />
-        <TextInput placeholder="Search Accounts..." value={search} onChangeText={setSearch} style={styles.searchInput} />
+        <TextInput placeholder="Search Accounts..." value={search} onChangeText={setSearch} style={styles.searchInput} placeholderTextColor="#9CA3AF"/>
       </View>
     </>
   )
@@ -71,9 +71,45 @@ const Accounts = () => {
         data={filteredAccounts}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
+        ListEmptyComponent={
+          <View
+            style={{
+              alignItems: "center",
+              marginTop: 60,
+              paddingHorizontal: 40,
+            }}
+          >
+            <Ionicons
+              name="wallet-outline"
+              size={64}
+              color="#D1D5DB"
+            />
+
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "700",
+                marginTop: 18,
+                color: "#0B1D3A",
+              }}
+            >
+              No Accounts Yet
+            </Text>
+
+            <Text
+              style={{
+                marginTop: 8,
+                textAlign: "center",
+                color: "#7B8190",
+              }}
+            >
+              Tap the + button to create your first account.
+            </Text>
+          </View>
+        }
         contentContainerStyle={styles.listContent}
         renderItem={({item}) => (
-          <Pressable style={styles.accountCard}>
+          <Pressable style={styles.accountCard} onPress={() => router.push(`/account-details/${item.id}`)}>
             <View style={styles.accountIcon}>
               <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>
             </View>
@@ -92,7 +128,7 @@ const Accounts = () => {
           </Pressable>
         )}
       />
-      <Pressable style={styles.fab}>
+      <Pressable style={styles.fab} onPress={() => presentAccountSheet({ mode: "create"})}>
           <Ionicons name="add" size={28} color="#FFFFFF" />
       </Pressable>
     </SafeAreaView>
@@ -223,7 +259,7 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: 24,
-    bottom: 30,
+    bottom: 60,
     width: 58,
     height: 58,
     borderRadius: 29,
@@ -233,3 +269,4 @@ const styles = StyleSheet.create({
     elevation: 8,
   }
 })
+//hi my name is 

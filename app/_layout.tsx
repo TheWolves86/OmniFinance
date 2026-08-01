@@ -6,6 +6,7 @@ import { StyleSheet, View } from "react-native";
 import { useEffect, useState } from "react";
 import { initializeDatabase } from "@/src/db/initialize";
 import { seedDatabase } from "@/src/db/seed";
+import AccountBottomSheet from "@/src/components/accountBottomSheet";
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -18,6 +19,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={styles.container}>
         <BottomSheetModalProvider>
           <Slot />
+          <AccountBottomSheet />
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
