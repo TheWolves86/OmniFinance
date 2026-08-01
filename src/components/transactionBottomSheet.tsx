@@ -120,25 +120,33 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   };
 
   async function loadAccounts(preselectedId?: string){
-    const data = await getAllAccounts();
-    setAccounts(data);
-    const matchedAccount = preselectedId && data.some((account: any) => account.id === preselectedId)
-      ? preselectedId
-      : data.length > 0 ? data[0].id : "";
-    setSelectedAccount(matchedAccount);
+    try {
+      const data = await getAllAccounts();
+      setAccounts(data);
+      const matchedAccount = preselectedId && data.some((account: any) => account.id === preselectedId)
+        ? preselectedId
+        : data.length > 0 ? data[0].id : "";
+      setSelectedAccount(matchedAccount);
+    } catch (error) {
+      console.error("Error loading accounts:", error);
+    }
   }
 
   async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
-    const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
-    setCategories(data);
-    const matchedCategory = preselectedId && data.some((category: any) => category.id === preselectedId)
-      ? preselectedId
-      : data.length > 0 ? data[0].id : "";
+    try {
+      const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
+      setCategories(data);
+      const matchedCategory = preselectedId && data.some((category: any) => category.id === preselectedId)
+        ? preselectedId
+        : data.length > 0 ? data[0].id : "";
 
-    if (selectFirst || preselectedId) {
-      setSelectedCategory(matchedCategory);
-    } else {
-      setSelectedCategory("");
+      if (selectFirst || preselectedId) {
+        setSelectedCategory(matchedCategory);
+      } else {
+        setSelectedCategory("");
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
     }
   }
 
