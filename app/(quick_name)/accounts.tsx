@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, TextInput, ScrollView} from 'react-native'
+import { StyleSheet, Text, View, Pressable, TextInput, FlatList } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -6,9 +6,22 @@ import { getAllAccounts } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
 import { presentAccountSheet } from "@/src/components/accountSheetController"
 
+type Account = {
+  id: string
+  name: string
+  type: string
+  balance: number
+  currency: string
+  icon?: string | null
+  color?: string | null
+  isDefault: boolean
+  createdAt?: number
+  updatedAt?: number
+}
+
 const Accounts = () => {
   const router = useRouter()
-  const [accounts, setAccounts] = useState<any[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [search, setSearch] = useState("")
   useEffect(() => {
     loadAccounts()
@@ -71,7 +84,7 @@ const Accounts = () => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={filteredAccounts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: Account) => item.id}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View
@@ -110,12 +123,12 @@ const Accounts = () => {
           </View>
         }
         contentContainerStyle={styles.listContent}
-        getItemLayout={(data, index) => ({
+        getItemLayout={(data: ArrayLike<Account> | null | undefined, index: number) => ({
           length: 73, // Height of account card based on styling (approx)
           offset: 73 * index,
           index,
         })}
-        renderItem={({item}) => (
+        renderItem={({item}: { item: Account }) => (
           <Pressable style={styles.accountCard} onPress={() => router.push(`/account-details/${item.id}`)}>
             <View style={styles.accountIcon}>
               <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>
