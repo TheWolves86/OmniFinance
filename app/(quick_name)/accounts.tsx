@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Pressable, TextInput, FlatList} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { StyleSheet, Text, View, Pressable, TextInput, ScrollView} from 'react-native'
+import React, { useEffect, useState, useMemo } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
@@ -22,8 +22,10 @@ const Accounts = () => {
     }
   }
 
-  const filteredAccounts = accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
-  const hasAccounts = filteredAccounts.length > 0;
+  const filteredAccounts = useMemo(() => {
+    return accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
+  }, [accounts, search])
+
   const renderHeader = () => (
     <>
       <View style={styles.header}>
@@ -108,6 +110,11 @@ const Accounts = () => {
           </View>
         }
         contentContainerStyle={styles.listContent}
+        getItemLayout={(data, index) => ({
+          length: 73, // Height of account card based on styling (approx)
+          offset: 73 * index,
+          index,
+        })}
         renderItem={({item}) => (
           <Pressable style={styles.accountCard} onPress={() => router.push(`/account-details/${item.id}`)}>
             <View style={styles.accountIcon}>

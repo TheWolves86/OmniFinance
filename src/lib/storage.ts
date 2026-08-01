@@ -10,7 +10,7 @@ export async function saveItem(key: string, value: string) {
             await AsyncStorage.setItem(key, value);
         }
     } catch (error) {
-        console.error("Error saving item to storage:", error);
+        console.error("Error saving item to storage");
         throw error;
     }
 }
@@ -22,7 +22,7 @@ export async function getItem(key: string) {
         }
         return await AsyncStorage.getItem(key);
     } catch (error) {
-        console.error("Error getting item from storage:", error);
+        console.error("Error getting item from storage");
         throw error;
     }
 }
@@ -35,7 +35,7 @@ export async function removeItem(key: string) {
             await AsyncStorage.removeItem(key);
         }
     } catch (error) {
-        console.error("Error removing item from storage:", error);
+        console.error("Error removing item from storage");
         throw error;
     }
 }
