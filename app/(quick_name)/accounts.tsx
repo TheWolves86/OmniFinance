@@ -95,37 +95,18 @@ const Accounts = () => {
         keyExtractor={(item: Account) => item.id}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
-          <View
-            style={{
-              alignItems: "center",
-              marginTop: 60,
-              paddingHorizontal: 40,
-            }}
-          >
+          <View style={styles.emptyContainer}>
             <Ionicons
               name="wallet-outline"
               size={64}
               color="#D1D5DB"
             />
 
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "700",
-                marginTop: 18,
-                color: "#0B1D3A",
-              }}
-            >
+            <Text style={styles.emptyTitle}>
               No Accounts Yet
             </Text>
 
-            <Text
-              style={{
-                marginTop: 8,
-                textAlign: "center",
-                color: "#7B8190",
-              }}
-            >
+            <Text style={styles.emptySubtitle}>
               Tap the + button to create your first account.
             </Text>
           </View>
@@ -141,7 +122,7 @@ const Accounts = () => {
             <View style={styles.accountIcon}>
               <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>
             </View>
-            <View style={{ flex: 1, marginLeft: 12}}>
+            <View style={styles.accountDetails}>
               <Text style={styles.accountName}>
                 {item.name}
               </Text>
@@ -295,6 +276,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 60,
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 18,
+    color: "#0B1D3A",
+  },
+  emptySubtitle: {
+    marginTop: 8,
+    textAlign: "center",
+    color: "#7B8190",
+  },
+  accountDetails: {
+    flex: 1,
+    marginLeft: 12
   }
 })
 //

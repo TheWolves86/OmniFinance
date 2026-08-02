@@ -69,7 +69,7 @@ const AccountDetailsBottomSheet = forwardRef<BottomSheetModal, Props>(
             topInset={insets.top}
             onDismiss={props.onClose}
         >
-            
+            <View style={styles.content}></View>
         </BottomSheetModal>
     )
   }
