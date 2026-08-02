@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
-import { presentAccountSheet } from "@/src/components/accountSheetController"
+import { presentAccountSheet, subscribeAccountRefresh} from "@/src/components/accountSheetController"
 
 type Account = {
   id: string
@@ -25,6 +25,14 @@ const Accounts = () => {
   const [search, setSearch] = useState("")
   useEffect(() => {
     loadAccounts()
+
+    const unsubscribe = subscribeAccountRefresh(() => {
+      loadAccounts()
+    })
+
+    return () => {
+      unsubscribe()
+    }
   }, [])
   async function loadAccounts() {
     try {
@@ -124,7 +132,7 @@ const Accounts = () => {
         }
         contentContainerStyle={styles.listContent}
         getItemLayout={(data: ArrayLike<Account> | null | undefined, index: number) => ({
-          length: 73, // Height of account card based on styling (approx)
+          length: 73, 
           offset: 73 * index,
           index,
         })}
@@ -289,4 +297,4 @@ const styles = StyleSheet.create({
     elevation: 8,
   }
 })
-//hi my name is 
+//

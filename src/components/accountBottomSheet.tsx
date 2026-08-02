@@ -9,6 +9,8 @@ import {
   AccountSheetPayload,
 } from "./accountSheetController";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { createAccount } from "../db/repository/account";
+import { emitAccountChanged } from "./accountSheetController";
 
 const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const modalRef = useRef<BottomSheetModal>(null);
@@ -20,6 +22,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [selectedColor, setSelectedColor] = useState("#3B82F6");
   const [selectedIcon, setSelectedIcon] = useState("wallet-outline");
   const [isDefault, setIsDefault] = useState(false);
+  const [currency, setCurrency] = useState("")
 
   useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, [modalRef]);
 
@@ -40,6 +43,36 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const colors = ["#3B82F6", "#22C55E", "#8B5CF6", "#F97316", "#EF4444", "#111827"];
   const icons = ["wallet-outline", "card-outline", "cash-outline", "business-outline", "card", "logo-bitcoin"];
 
+  async function handleSave(){
+    try {
+      if (accountName.trim() === ""){
+        return;
+      }
+      await createAccount({
+        name: accountName.trim(),
+        type: accountType,
+        balance: Number(openingBalance || 0),
+        currency: currency,
+        icon: selectedIcon,
+        color: selectedColor,
+        isDefault
+      });
+
+      emitAccountChanged();
+
+      dismissAccountSheet();
+
+      setAccountName("");
+      setOpeningBalance("");
+      setAccountType("Cash");
+      setSelectedColor("#3B82F6")
+      setSelectedIcon("wallet-outline")
+      setIsDefault(true)
+      setCurrency("INR")
+    } catch (error) {
+      console.error(error)
+    }
+  }
   const renderBackdrop = useMemo(
     () =>
       (backdropProps: any) => (
@@ -159,7 +192,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
           </View>
         </View>
 
-        <Pressable style={styles.saveButton} onPress={() => dismissAccountSheet()}>
+        <Pressable style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save Account</Text>
         </Pressable>
       </BottomSheetScrollView>
