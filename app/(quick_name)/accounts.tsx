@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View, Pressable, TextInput, FlatList } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TextInput, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllAccounts } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
 import { presentAccountSheet, subscribeAccountRefresh} from "@/src/components/accountSheetController"
+import AccountDetailsBottomSheet from '@/src/components/accountDetailsBottomSheet'
+import { deleteAccount } from '@/src/db/repository/account'
 
 type Account = {
   id: string
@@ -23,6 +25,7 @@ const Accounts = () => {
   const router = useRouter()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [search, setSearch] = useState("")
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
   useEffect(() => {
     loadAccounts()
 
@@ -46,6 +49,53 @@ const Accounts = () => {
   const filteredAccounts = useMemo(() => {
     return accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
   }, [accounts, search])
+
+  function openAccountDetails(account: Account) {
+    setSelectedAccount(account)
+  }
+
+  function closeAccountDetails() {
+    setSelectedAccount(null)
+  }
+
+  async function handleEditAccount() {
+    if (!selectedAccount) {
+      return
+    }
+
+    closeAccountDetails()
+    presentAccountSheet({
+      mode: "edit",
+      account: selectedAccount,
+    })
+  }
+
+  async function handleDeleteAccount() {
+    if (!selectedAccount) {
+      return
+    }
+
+    Alert.alert(
+      "Delete account?",
+      `This will permanently remove ${selectedAccount.name}.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount(selectedAccount.id)
+              closeAccountDetails()
+              loadAccounts()
+            } catch (error) {
+              console.error(error)
+            }
+          },
+        },
+      ]
+    )
+  }
 
   const renderHeader = () => (
     <>
@@ -118,7 +168,7 @@ const Accounts = () => {
           index,
         })}
         renderItem={({item}: { item: Account }) => (
-          <Pressable style={styles.accountCard} onPress={() => router.push(`/account-details/${item.id}`)}>
+          <Pressable style={styles.accountCard} onPress={() => openAccountDetails(item)}>
             <View style={styles.accountIcon}>
               <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>
             </View>
@@ -140,6 +190,12 @@ const Accounts = () => {
       <Pressable style={styles.fab} onPress={() => presentAccountSheet({ mode: "create"})}>
           <Ionicons name="add" size={28} color="#FFFFFF" />
       </Pressable>
+      <AccountDetailsBottomSheet
+        account={selectedAccount}
+        onClose={closeAccountDetails}
+        onEdit={handleEditAccount}
+        onDelete={handleDeleteAccount}
+      />
     </SafeAreaView>
   )
 }
@@ -298,4 +354,4 @@ const styles = StyleSheet.create({
     marginLeft: 12
   }
 })
-//
+//pani dedo
