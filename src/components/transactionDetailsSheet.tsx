@@ -53,7 +53,7 @@ export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionD
                 onDelete(transaction);
               }
             } catch (error) {
-              console.error(error);
+              console.error("Error deleting transaction:", error);
             } finally {
               setIsDeleting(false);
             }

@@ -220,7 +220,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       resetForm();
       dismissTransactionSheet();
     } catch (error) {
-      console.error(error)
+      console.error("Error saving transaction:", error)
     }
   }
   const formattedDate = transactionDate.toLocaleDateString("en-IN", {
