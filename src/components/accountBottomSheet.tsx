@@ -9,7 +9,7 @@ import {
   AccountSheetPayload,
 } from "./accountSheetController";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { createAccount } from "../db/repository/account";
+import { createAccount, updateAccount } from "../db/repository/account";
 import { emitAccountChanged } from "./accountSheetController";
 
 const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
@@ -31,6 +31,24 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
 
     const unsubscribe = subscribeAccountSheet((nextPayload) => {
       setPayload(nextPayload);
+
+      if (nextPayload.mode === "edit" && nextPayload.account) {
+        setAccountName(nextPayload.account.name ?? "");
+        setOpeningBalance(String(nextPayload.account.balance ?? 0));
+        setAccountType(nextPayload.account.type ?? "Cash");
+        setSelectedColor(nextPayload.account.color ?? "#3B82F6");
+        setSelectedIcon(nextPayload.account.icon ?? "wallet-outline");
+        setIsDefault(Boolean(nextPayload.account.isDefault));
+        setCurrency(nextPayload.account.currency ?? "INR");
+      } else {
+        setAccountName("");
+        setOpeningBalance("");
+        setAccountType("Cash");
+        setSelectedColor("#3B82F6");
+        setSelectedIcon("wallet-outline");
+        setIsDefault(false);
+        setCurrency("INR");
+      }
     });
 
     return () => {
@@ -48,15 +66,28 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       if (accountName.trim() === ""){
         return;
       }
-      await createAccount({
-        name: accountName.trim(),
-        type: accountType,
-        balance: Number(openingBalance || 0),
-        currency: currency,
-        icon: selectedIcon,
-        color: selectedColor,
-        isDefault
-      });
+
+      if (payload.mode === "edit" && payload.account?.id) {
+        await updateAccount(payload.account.id, {
+          name: accountName.trim(),
+          type: accountType,
+          balance: Number(openingBalance || 0),
+          currency: currency,
+          icon: selectedIcon,
+          color: selectedColor,
+          isDefault
+        });
+      } else {
+        await createAccount({
+          name: accountName.trim(),
+          type: accountType,
+          balance: Number(openingBalance || 0),
+          currency: currency,
+          icon: selectedIcon,
+          color: selectedColor,
+          isDefault
+        });
+      }
 
       emitAccountChanged();
 
@@ -67,8 +98,9 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       setAccountType("Cash");
       setSelectedColor("#3B82F6")
       setSelectedIcon("wallet-outline")
-      setIsDefault(true)
+      setIsDefault(false)
       setCurrency("INR")
+      setPayload({ mode: "create" });
     } catch (error) {
       console.error(error)
     }
