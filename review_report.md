@@ -1,7 +1,7 @@
 ## JULES REVIEW REPORT
-Date: 2026-07-31
+Date: 2026-08-02
 Project: OmniFinance
-Files Reviewed: 10
+Files Reviewed: 11
 
 ---
 
@@ -10,72 +10,79 @@ None found this session. Secrets like API keys are appropriately managed using `
 
 ---
 
-### 🟠 BUGS & ERROR HANDLING (2)
-File: src/components/transactionBottomSheet.tsx
-Line: 122, 131
-Issue: Unhandled promise rejections in `async` functions `loadAccounts` and `loadCategories`.
-Why it's dangerous: Asynchronous functions (`getAllAccounts`, `getIncomeCategory`, `getExpenseCategories`) fetch data from the SQLite database. If the database call fails or rejects, the promise is unhandled, which will cause the app to silently fail or crash during the UI transaction flow.
-Fix:
-<<<<<<< SEARCH
-  async function loadAccounts(preselectedId?: string){
-    const data = await getAllAccounts();
-    setAccounts(data);
-    const matchedAccount = preselectedId && data.some((account: any) => account.id === preselectedId)
-      ? preselectedId
-      : data.length > 0 ? data[0].id : "";
-    setSelectedAccount(matchedAccount);
-  }
-
-  async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
-    const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
-    setCategories(data);
-    const matchedCategory = preselectedId && data.some((category: any) => category.id === preselectedId)
-      ? preselectedId
-      : data.length > 0 ? data[0].id : "";
-
-    if (selectFirst || preselectedId) {
-      setSelectedCategory(matchedCategory);
-    } else {
-      setSelectedCategory("");
-    }
-  }
-=======
-  async function loadAccounts(preselectedId?: string){
-    try {
-      const data = await getAllAccounts();
-      setAccounts(data);
-      const matchedAccount = preselectedId && data.some((account: any) => account.id === preselectedId)
-        ? preselectedId
-        : data.length > 0 ? data[0].id : "";
-      setSelectedAccount(matchedAccount);
-    } catch (error) {
-      console.error("Error loading accounts:", error);
-    }
-  }
-
-  async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
-    try {
-      const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
-      setCategories(data);
-      const matchedCategory = preselectedId && data.some((category: any) => category.id === preselectedId)
-        ? preselectedId
-        : data.length > 0 ? data[0].id : "";
-
-      if (selectFirst || preselectedId) {
-        setSelectedCategory(matchedCategory);
-      } else {
-        setSelectedCategory("");
-      }
-    } catch (error) {
-      console.error("Error loading categories:", error);
-    }
-  }
->>>>>>> REPLACE
+### 🟠 BUGS & ERROR HANDLING (0)
+None found this session. The previous unhandled promise rejections in `src/components/transactionBottomSheet.tsx` have been successfully addressed. Database operations are correctly wrapped with async transactions, and API fetch calls use try/catch effectively.
 
 ---
 
-### 🟡 PERFORMANCE ISSUES (0)
-None found this session.
+### 🟡 PERFORMANCE ISSUES (1)
+
+File: app/(quick_name)/accounts.tsx
+Line: 99, 112, 123, 144
+Issue: Inline styles inside `renderItem` and `ListEmptyComponent` of a `FlatList` component.
+Why it's dangerous: Inline style objects inside render functions cause unnecessary re-renders in React Native since a new object reference is created on every render, degrading UI scroll performance and frame rate, especially as list items grow.
+Fix:
+```diff
+-        ListEmptyComponent={
+-          <View
+-            style={{
+-              alignItems: "center",
+-              marginTop: 60,
+-              paddingHorizontal: 40,
+-            }}
+-          >
+-            <Ionicons
+-              name="wallet-outline"
+-              size={64}
+-              color="#D1D5DB"
+-            />
+-
+-            <Text
+-              style={{
+-                fontSize: 20,
+-                fontWeight: "700",
+-                marginTop: 18,
+-                color: "#0B1D3A",
+-              }}
+-            >
+-              No Accounts Yet
+-            </Text>
+-
+-            <Text
+-              style={{
+-                marginTop: 8,
+-                textAlign: "center",
+-                color: "#7B8190",
+-              }}
+-            >
+-              Tap the + button to create your first account.
+-            </Text>
+-          </View>
+-        }
++        ListEmptyComponent={
++          <View style={styles.emptyContainer}>
++            <Ionicons
++              name="wallet-outline"
++              size={64}
++              color="#D1D5DB"
++            />
++
++            <Text style={styles.emptyTitle}>
++              No Accounts Yet
++            </Text>
++
++            <Text style={styles.emptySubtitle}>
++              Tap the + button to create your first account.
++            </Text>
++          </View>
++        }
+```
+And inside `renderItem`:
+```diff
+-            <View style={{ flex: 1, marginLeft: 12}}>
++            <View style={styles.accountDetails}>
+```
+And added the corresponding styles in `StyleSheet.create`.
 
 ---
 
@@ -88,10 +95,11 @@ Why it's dangerous: Inconsistent naming conventions can lead to developer confus
 ---
 
 ### ✅ FIXES APPLIED
-- `src/components/transactionBottomSheet.tsx`: Wrapped `loadAccounts` and `loadCategories` in try/catch blocks to gracefully handle potential promise rejections from DB fetch functions.
+- `app/(quick_name)/accounts.tsx`: Line 99, 112, 123, 144 - Removed inline styling from `ListEmptyComponent` and `renderItem`, migrating them to `StyleSheet.create` for optimal render performance.
+- `src/components/accountDetailsBottomSheet.tsx`: Line 62 - Fixed type issue of missing children for `<BottomSheetModal>`.
 
 ---
 
 ### 📋 WHAT TO WATCH NEXT SESSION
 - Consider addressing the "settigs" table misspelling by orchestrating a smooth data migration schema update.
-- Ensure any additional data fetching wrappers introduced alongside `useEffect` logic are similarly wrapped in try/catch.
+- Ensure any new large lists implemented leverage `<FlatList>` and properly handle keys and item rendering without utilizing inline styling.
