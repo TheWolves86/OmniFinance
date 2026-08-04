@@ -1,7 +1,7 @@
 ## JULES REVIEW REPORT
 Date: 2026-08-02
 Project: OmniFinance
-Files Reviewed: 11
+Files Reviewed: 12
 
 ---
 
@@ -10,8 +10,25 @@ None found this session. Secrets like API keys are appropriately managed using `
 
 ---
 
-### 🟠 BUGS & ERROR HANDLING (0)
-None found this session. The previous unhandled promise rejections in `src/components/transactionBottomSheet.tsx` have been successfully addressed. Database operations are correctly wrapped with async transactions, and API fetch calls use try/catch effectively.
+### 🟠 BUGS & ERROR HANDLING (1)
+File: app/(tabs)/activity.tsx
+Line: 95
+Issue: Using `Math.random()` as a fallback in `keyExtractor`.
+Why it's dangerous: Using `Math.random()` for React keys causes the component to lose identity across renders, forcing React to unmount and remount the DOM nodes or native views entirely. This leads to severe UI state bugs and degrades performance significantly on lists.
+Fix:
+```diff
+<<<<<<< SEARCH
+      <SectionList
+        sections={sortedGroups}
+        keyExtractor={(item) => String(item?.id ?? Math.random())}
+        stickySectionHeadersEnabled={false}
+=======
+      <SectionList
+        sections={sortedGroups}
+        keyExtractor={(item, index) => String(item?.id ?? index.toString())}
+        stickySectionHeadersEnabled={false}
+>>>>>>> REPLACE
+```
 
 ---
 
@@ -97,9 +114,10 @@ Why it's dangerous: Inconsistent naming conventions can lead to developer confus
 ### ✅ FIXES APPLIED
 - `app/(quick_name)/accounts.tsx`: Line 99, 112, 123, 144 - Removed inline styling from `ListEmptyComponent` and `renderItem`, migrating them to `StyleSheet.create` for optimal render performance.
 - `src/components/accountDetailsBottomSheet.tsx`: Line 62 - Fixed type issue of missing children for `<BottomSheetModal>`.
+- `app/(tabs)/activity.tsx`: Line 95 - Replaced `Math.random()` with `index.toString()` in `keyExtractor` to maintain stable keys across renders.
 
 ---
 
 ### 📋 WHAT TO WATCH NEXT SESSION
 - Consider addressing the "settigs" table misspelling by orchestrating a smooth data migration schema update.
-- Ensure any new large lists implemented leverage `<FlatList>` and properly handle keys and item rendering without utilizing inline styling.
+- Ensure any new large lists implemented leverage `<FlatList>` and properly handle keys and item rendering without utilizing inline styling or random keys.

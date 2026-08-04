@@ -92,7 +92,7 @@ export default function ActivityPage() {
     <SafeAreaView style={styles.container}>
       <SectionList
         sections={sortedGroups}
-        keyExtractor={(item) => String(item?.id ?? Math.random())}
+        keyExtractor={(item, index) => String(item?.id ?? index.toString())}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
