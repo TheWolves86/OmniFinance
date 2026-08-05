@@ -1,105 +1,96 @@
 ## JULES REVIEW REPORT
-Date: 2026-08-02
+Date: 2026-08-05
 Project: OmniFinance
-Files Reviewed: 11
+Files Reviewed: 8
 
 ---
 
 ### 🔴 CRITICAL SECURITY ISSUES (0)
-None found this session. Secrets like API keys are appropriately managed using `SecureStore` (e.g. `src/lib/storage.ts`) and SQLite string constructions properly employ parameterized SQL bindings avoiding SQLi vulnerabilities.
+None found this session.
 
 ---
 
-### 🟠 BUGS & ERROR HANDLING (0)
-None found this session. The previous unhandled promise rejections in `src/components/transactionBottomSheet.tsx` have been successfully addressed. Database operations are correctly wrapped with async transactions, and API fetch calls use try/catch effectively.
+### 🟠 BUGS & ERROR HANDLING (4)
+
+File: app/(tabs)/activity.tsx
+Line: 95
+Issue: Usage of Math.random() in React Native FlatList/SectionList keyExtractor.
+Why it's dangerous: Using Math.random() for keys causes components to completely unmount and remount on every render, losing state, degrading performance, and creating UI bugs.
+Fix:
+```typescript
+<<<<<<< SEARCH
+        keyExtractor={(item) => String(item?.id ?? Math.random())}
+=======
+        keyExtractor={(item, index) => String(item?.id ?? index.toString())}
+>>>>>>> REPLACE
+```
+
+File: app/(tabs)/dashboard.tsx
+Line: 29
+Issue: Logging raw error objects and lacking context string in catch blocks.
+Why it's dangerous: Raw errors could leak sensitive execution data. Logging errors without context makes debugging impossible.
+Fix:
+```typescript
+<<<<<<< SEARCH
+      console.error(error)
+=======
+      console.error("Error loading dashboard data:", error)
+>>>>>>> REPLACE
+```
+
+File: app/(quick_name)/accounts.tsx
+Line: 45
+Issue: Lacking context string in catch block.
+Why it's dangerous: Hard to debug if error log has no context.
+Fix:
+```typescript
+<<<<<<< SEARCH
+      console.error(error)
+=======
+      console.error("Error loading accounts:", error)
+>>>>>>> REPLACE
+```
+
+File: src/components/transactionBottomSheet.tsx
+Line: 240
+Issue: Lacking context string in catch block.
+Why it's dangerous: Hard to debug if error log has no context.
+Fix:
+```typescript
+<<<<<<< SEARCH
+      console.error(error)
+=======
+      console.error("Error saving transaction:", error)
+>>>>>>> REPLACE
+```
 
 ---
 
 ### 🟡 PERFORMANCE ISSUES (1)
 
-File: app/(quick_name)/accounts.tsx
-Line: 99, 112, 123, 144
-Issue: Inline styles inside `renderItem` and `ListEmptyComponent` of a `FlatList` component.
-Why it's dangerous: Inline style objects inside render functions cause unnecessary re-renders in React Native since a new object reference is created on every render, degrading UI scroll performance and frame rate, especially as list items grow.
-Fix:
-```diff
--        ListEmptyComponent={
--          <View
--            style={{
--              alignItems: "center",
--              marginTop: 60,
--              paddingHorizontal: 40,
--            }}
--          >
--            <Ionicons
--              name="wallet-outline"
--              size={64}
--              color="#D1D5DB"
--            />
--
--            <Text
--              style={{
--                fontSize: 20,
--                fontWeight: "700",
--                marginTop: 18,
--                color: "#0B1D3A",
--              }}
--            >
--              No Accounts Yet
--            </Text>
--
--            <Text
--              style={{
--                marginTop: 8,
--                textAlign: "center",
--                color: "#7B8190",
--              }}
--            >
--              Tap the + button to create your first account.
--            </Text>
--          </View>
--        }
-+        ListEmptyComponent={
-+          <View style={styles.emptyContainer}>
-+            <Ionicons
-+              name="wallet-outline"
-+              size={64}
-+              color="#D1D5DB"
-+            />
-+
-+            <Text style={styles.emptyTitle}>
-+              No Accounts Yet
-+            </Text>
-+
-+            <Text style={styles.emptySubtitle}>
-+              Tap the + button to create your first account.
-+            </Text>
-+          </View>
-+        }
-```
-And inside `renderItem`:
-```diff
--            <View style={{ flex: 1, marginLeft: 12}}>
-+            <View style={styles.accountDetails}>
-```
-And added the corresponding styles in `StyleSheet.create`.
+File: app/(tabs)/activity.tsx
+Line: 95
+Issue: Math.random() as key in SectionList.
+Why it's dangerous: Math.random() breaks component identity across renders, forcing expensive full re-renders of the list instead of efficiently recycling views. Fixed in BUG category.
 
 ---
 
-### 🔵 CODE QUALITY (1)
-File: src/db/repository/settings.ts
-Line: 4, 5, 6
-Issue: Misspelled table name "settigs" across database transactions.
-Why it's dangerous: Inconsistent naming conventions can lead to developer confusion, even if the database accurately tracks the alias. (Flagged for tracking; no surgical changes applied yet to avoid unintended database schema disruptions).
+### 🔵 CODE QUALITY (0)
+None found this session.
 
 ---
 
 ### ✅ FIXES APPLIED
-- `app/(quick_name)/accounts.tsx`: Line 99, 112, 123, 144 - Removed inline styling from `ListEmptyComponent` and `renderItem`, migrating them to `StyleSheet.create` for optimal render performance.
-- `src/components/accountDetailsBottomSheet.tsx`: Line 62 - Fixed type issue of missing children for `<BottomSheetModal>`.
+- `app/(tabs)/activity.tsx`: Line 95 - Replaced `Math.random()` with `index.toString()` in `keyExtractor`.
+- `app/(tabs)/activity.tsx`: Line 22 - Added context string to `console.error`.
+- `app/(tabs)/dashboard.tsx`: Line 29 - Added context string to `console.error`.
+- `app/(quick_name)/accounts.tsx`: Line 45, 92 - Added context string to `console.error`.
+- `src/components/transactionBottomSheet.tsx`: Line 240 - Added context string to `console.error`.
+- `src/components/accountBottomSheet.tsx`: Line 118 - Added context string to `console.error`.
+- `src/components/transactionDetailsSheet.tsx`: Line 62 - Added context string to `console.error`.
 
 ---
 
 ### 📋 WHAT TO WATCH NEXT SESSION
-- Consider addressing the "settigs" table misspelling by orchestrating a smooth data migration schema update.
-- Ensure any new large lists implemented leverage `<FlatList>` and properly handle keys and item rendering without utilizing inline styling.
+- Continue ensuring all new list components use stable keys and avoid `Math.random()` or inline styles.
+- Verify that `console.error` consistently includes informative context strings across newly added files.

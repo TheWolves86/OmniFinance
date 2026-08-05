@@ -19,7 +19,7 @@ export default function ActivityPage() {
       const data = await getAllTransaction();
       setTransactions(data ?? []);
     } catch (error) {
-      console.error(error);
+      console.error("Error loading transactions:", error);
     }
   }, []);
 
@@ -92,7 +92,7 @@ export default function ActivityPage() {
     <SafeAreaView style={styles.container}>
       <SectionList
         sections={sortedGroups}
-        keyExtractor={(item) => String(item?.id ?? Math.random())}
+        keyExtractor={(item, index) => String(item?.id ?? index.toString())}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
