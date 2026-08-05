@@ -21,6 +21,7 @@ type Category = {
   icon: string;
 };
 
+//main colors used in this bottom sheet
 const COLORS = {
   background: "#F7F8FA",
   white: "#FFFFFF",
@@ -29,11 +30,14 @@ const COLORS = {
   border: "#E8ECF2"
 };
 
+//bottom sheet used for adding and editing transactions
 const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
+  //height of the bottom sheet
   const snapPoints = useMemo(() => ["95%"], [])
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
 
+  //dark background behind the sheet
   const renderBackDrop = useCallback(
     (backdropProps: any) => (
       <BottomSheetBackdrop
@@ -47,6 +51,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     []
   );
 
+  //states for storing the data
   const [ transactionType, setTransactionType ] = useState<"income" | "expense">("expense")
   const [ title, setTitle ] = useState("")
   const [ amount, setAmount ] = useState("")
@@ -62,21 +67,26 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const modalRef = useRef<BottomSheetModal>(null);
 
+  //lets parent components control this bottom sheet
   useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, [modalRef]);
 
+  //register this sheet so it can be opened from anywhere
   useEffect(() => {
     registerTransactionSheet(modalRef.current);
     return () => registerTransactionSheet(null);
   }, []);
 
+  //loads all accounts when the sheet opens
   useEffect(() => {
     loadAccounts();
   }, []);
 
+  //reload categories whenever transaction type changes
   useEffect(() => {
     loadCategories();
   }, [transactionType]);
 
+  //listen for create or edit requests
   useEffect(() => {
     const unsubscribe = subscribeTransactionSheet((payload: TransactionSheetPayload) => {
       if (payload.mode === "edit" && payload.transaction) {
@@ -104,6 +114,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     return unsubscribe;
   }, []);
 
+  //save the selected transaction date
   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === "android") {
       setIsDatePickerOpen(false);
@@ -114,11 +125,13 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     }
   };
 
+  //open/close the notes section smotthly
   const toggleNotes = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsNotesExpanded((current) => !current);
   };
 
+  //get all the accounts form databse
   async function loadAccounts(preselectedId?: string){
     try {
       const data = await getAllAccounts();
@@ -132,6 +145,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     }
   }
 
+  //get all the categories from databse
   async function loadCategories(selectFirst = true, type: "income" | "expense" = transactionType, preselectedId?: string){
     try {
       const data = type === "income" ? await getIncomeCategory() : await getExpenseCategories();
@@ -150,6 +164,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     }
   }
 
+  //reset everything after saving or closing
   const resetForm = () => {
     setSheetMode("create");
     setEditingTransactionId(null);
@@ -166,12 +181,14 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     void loadCategories(false, "expense");
   };
 
+  //switch between income and expense
   const handleTypeChange = (value: "income" | "expense") => {
     setTransactionType(value);
     setSelectedCategory("");
     void loadCategories(false, value);
   };
 
+  //validate inputs and save the transaction
   const handleSave = async () => {
     const trimmedTitle = title.trim();
     const numericAmount = Number(amount);
@@ -223,11 +240,13 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       console.error(error)
     }
   }
+  //format the date so it looks nice
   const formattedDate = transactionDate.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+  //bottom sheet ui starts here
   return (
     <BottomSheetModal
       ref={modalRef}
@@ -638,3 +657,4 @@ const styles = StyleSheet.create({
   },
 });
 //
+

@@ -24,10 +24,13 @@ type Props = {
 
 const AccountDetailsBottomSheet = forwardRef<any, Props>((props, _ref) => {
   const insets = useSafeAreaInsets()
+  //format account details for display
   const balanceText = props.account?.balance != null ? `₹${props.account.balance.toLocaleString("en-IN")}` : "-"
   const createdText = props.account?.createdAt != null ? new Date(props.account.createdAt).toLocaleString("en-IN") : "Not Available"
 
+  //account details ui
   return (
+    //show the sheet only when an account is selected
     <Modal visible={Boolean(props.account)} transparent animationType="slide" onRequestClose={props.onClose}>
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={props.onClose} />
@@ -44,6 +47,7 @@ const AccountDetailsBottomSheet = forwardRef<any, Props>((props, _ref) => {
               </Pressable>
             </View>
 
+            //account summary card
             <View style={styles.summaryCard}>
               <View style={[styles.iconCircle, { backgroundColor: props.account?.color ?? "#3B82F6" }] }>
                 <Ionicons name={(props.account?.icon as any) ?? "wallet-outline"} size={22} color="#FFFFFF" />

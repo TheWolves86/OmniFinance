@@ -10,6 +10,7 @@ type TransactionDetailsSheetProps = {
   onDelete?: (transaction: any) => void;
 };
 
+//small reusable row for showing transaction details
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.detailRow}>
     <Text style={styles.detailLabel}>{label}</Text>
@@ -17,10 +18,14 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => (
   </View>
 );
 
+//bottom sheet that shows full transaction details
 export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionDetailsSheetProps>(({ transaction, onEdit, onDelete }, ref) => {
+  //prevents multiple delete requests
   const [isDeleting, setIsDeleting] = useState(false);
+  //height of the bottom sheet
   const snapPoints = useMemo(() => ["80%"], []);
 
+  //dark overlay behind the bottom sheet
   const renderBackDrop = useCallback(
     (backdropProps: any) => (
       <BottomSheetBackdrop
@@ -34,6 +39,7 @@ export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionD
     []
   );
 
+  //ask for confirmation before deleting a transaction
   const handleDelete = () => {
     Alert.alert(
       "Delete Transaction?",
@@ -63,6 +69,7 @@ export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionD
     );
   };
 
+  //convert timestamp into a readable date
   const formattedDate = transaction?.transactionDate
     ? new Date(transaction.transactionDate).toLocaleDateString("en-IN", {
         day: "numeric",
@@ -71,10 +78,12 @@ export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionD
       })
     : "Unknown date";
 
+  //format amount with indian commas
   const amountText = Number(transaction?.amount ?? 0).toLocaleString("en-IN", {
     maximumFractionDigits: 2,
   });
 
+  //ui starts here
   return (
     <BottomSheetModal
       ref={ref}

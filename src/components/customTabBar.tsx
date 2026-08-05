@@ -16,6 +16,7 @@ type CustomTabBarProps = BottomTabBarProps & {
   onAddPress: () => void;
 };
 
+//icons for inactive tabs
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   dashboard: "grid-outline",
   activity: "receipt-outline",
@@ -23,6 +24,7 @@ const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   reports: "bar-chart-outline",
 };
 
+//icons for active tabs
 const ICONS_FOCUSED: Record<string, keyof typeof Ionicons.glyphMap> = {
   dashboard: "grid",
   activity: "receipt",
@@ -30,6 +32,7 @@ const ICONS_FOCUSED: Record<string, keyof typeof Ionicons.glyphMap> = {
   reports: "bar-chart",
 };
 
+//custom bottom navigation bar
 export default function CustomTabBar({ state, descriptors, navigation, onAddPress}: CustomTabBarProps) {
     const insets = useSafeAreaInsets();
 
@@ -43,6 +46,7 @@ export default function CustomTabBar({ state, descriptors, navigation, onAddPres
                     ? ICONS_FOCUSED[route.name]
                     : ICONS[route.name];
 
+                //navigate to the selected tab
                 const onPress = () => {
                 const event = navigation.emit({
                 type: "tabPress",
@@ -54,6 +58,7 @@ export default function CustomTabBar({ state, descriptors, navigation, onAddPres
                 navigation.navigate(route.name);
                 }
             };
+            //single tab button
              const tabButton = (
             <Pressable
               key={route.key}
@@ -77,6 +82,7 @@ export default function CustomTabBar({ state, descriptors, navigation, onAddPres
             </Pressable>
           );
 
+          //leave space for the center add button
           if (index === FAB_INDEX) {
             return (
               <React.Fragment key={`frag-${route.key}`}>
@@ -89,6 +95,7 @@ export default function CustomTabBar({ state, descriptors, navigation, onAddPres
           return tabButton;
         })}
         </View>
+        {/* floating add button */}
         <Pressable onPress={onAddPress} style={styles.fab} hitSlop={10}>
             <Ionicons name="add" size={28} color={WHITE} />
         </Pressable>

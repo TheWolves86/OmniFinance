@@ -13,6 +13,7 @@ import { createAccount, updateAccount } from "../db/repository/account";
 import { emitAccountChanged } from "./accountSheetController";
 
 const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
+  //All the states
   const modalRef = useRef<BottomSheetModal>(null);
   const insets = useSafeAreaInsets();
   const [payload, setPayload] = useState<AccountSheetPayload>({ mode: "create" });
@@ -24,14 +25,17 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
   const [isDefault, setIsDefault] = useState(false);
   const [currency, setCurrency] = useState("")
 
+  //let other screens open this bottom sheet
   useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, [modalRef]);
 
+  //listen for create/edit requests
   useEffect(() => {
     registerAccountSheet(modalRef.current);
 
     const unsubscribe = subscribeAccountSheet((nextPayload) => {
       setPayload(nextPayload);
 
+      //fill the form with existing account data
       if (nextPayload.mode === "edit" && nextPayload.account) {
         setAccountName(nextPayload.account.name ?? "");
         setOpeningBalance(String(nextPayload.account.balance ?? 0));
@@ -40,7 +44,9 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
         setSelectedIcon(nextPayload.account.icon ?? "wallet-outline");
         setIsDefault(Boolean(nextPayload.account.isDefault));
         setCurrency(nextPayload.account.currency ?? "INR");
-      } else {
+        }
+        //reset the form for creating a new account
+      else {
         setAccountName("");
         setOpeningBalance("");
         setAccountType("Cash");
@@ -56,17 +62,20 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       registerAccountSheet(null);
     };
   }, []);
-
+  //options shown in the account form
   const accountTypes = ["Cash", "Bank", "UPI", "Credit Card", "Wallet", "Investment"];
   const colors = ["#3B82F6", "#22C55E", "#8B5CF6", "#F97316", "#EF4444", "#111827"];
   const icons = ["wallet-outline", "card-outline", "cash-outline", "business-outline", "card", "logo-bitcoin"];
 
+  //Save a new account or update an existing one
   async function handleSave(){
     try {
+      //dont save if account is empty
       if (accountName.trim() === ""){
         return;
       }
 
+      //update an existing account
       if (payload.mode === "edit" && payload.account?.id) {
         await updateAccount(payload.account.id, {
           name: accountName.trim(),
@@ -77,7 +86,9 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
           color: selectedColor,
           isDefault
         });
-      } else {
+      } 
+      //create a new account
+      else {
         await createAccount({
           name: accountName.trim(),
           type: accountType,
@@ -89,10 +100,12 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
         });
       }
 
+      //tell other screens to refresh
       emitAccountChanged();
 
       dismissAccountSheet();
 
+      //clear the form after saving
       setAccountName("");
       setOpeningBalance("");
       setAccountType("Cash");
@@ -105,6 +118,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       console.error(error)
     }
   }
+  //dark background behind the bottom sheet
   const renderBackdrop = useMemo(
     () =>
       (backdropProps: any) => (
@@ -119,6 +133,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
     []
   );
 
+  //bottom sheet ui
   return (
     <BottomSheetModal
       ref={modalRef}
@@ -236,6 +251,7 @@ AccountBottomSheet.displayName = "AccountBottomSheet";
 
 export default AccountBottomSheet;
 
+//All the styles
 const styles = StyleSheet.create({
   content: {
     flex: 1,
