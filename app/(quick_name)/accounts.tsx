@@ -42,7 +42,7 @@ const Accounts = () => {
       const data = await getAllAccounts()
       setAccounts(data)
     } catch (error) {
-      console.error(error)
+      console.error("Error loading accounts:", error)
     }
   }
 
@@ -89,7 +89,7 @@ const Accounts = () => {
               closeAccountDetails()
               loadAccounts()
             } catch (error) {
-              console.error(error)
+              console.error("Error loading accounts:", error)
             }
           },
         },

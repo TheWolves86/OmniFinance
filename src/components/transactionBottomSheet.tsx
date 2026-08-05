@@ -237,7 +237,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       resetForm();
       dismissTransactionSheet();
     } catch (error) {
-      console.error(error)
+      console.error("Error saving transaction:", error)
     }
   }
   //format the date so it looks nice
