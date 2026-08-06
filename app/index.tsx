@@ -22,7 +22,7 @@ export default function Index() {
           setLoading(false);
         }
       } catch (error) {
-        console.error("Error checking onboarding status:", error);
+        console.error("Error checking onboarding status:", String(error));
         if (isMounted) {
           setLoading(false);
         }

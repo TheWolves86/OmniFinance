@@ -34,7 +34,7 @@ export async function seedDatabase(): Promise<void> {
       }
     });
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error("Error seeding database:", String(error));
     throw error;
   }
 }
