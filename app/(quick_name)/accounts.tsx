@@ -34,7 +34,7 @@ const Accounts = () => {
       const data = await getAllAccounts()
       setAccounts(data)
     } catch (error) {
-      console.error(error)
+      console.error("Error in accounts:", String(error))
     }
   }
 
@@ -92,7 +92,7 @@ const Accounts = () => {
               await loadAccounts()
               emitAccountChanged()
             } catch (error) {
-              console.error(error)
+              console.error("Error in accounts:", String(error))
             }
           },
         },

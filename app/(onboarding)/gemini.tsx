@@ -15,7 +15,7 @@ const Gemini = () => {
     try {
       await Linking.openURL("https://aistudio.google.com/app/apikey")
     } catch (error) {
-      console.error("Error opening link:", error);
+      console.error("Error opening link:", String(error));
       Alert.alert("Error", "Could not open the link.");
     }
   }
@@ -31,7 +31,7 @@ const Gemini = () => {
 
         router.replace("/(tabs)/dashboard")
       } catch (error) {
-        console.error("Error saving API key");
+        console.error("Error saving API key:", String(error));
         Alert.alert("Error", "Could not save the API key.");
       }
     }
@@ -42,7 +42,7 @@ const Gemini = () => {
       await saveItem(STORAGE_KEYS.ONBOARDING, "true");
       router.replace("/(tabs)/dashboard")
     } catch (error) {
-      console.error("Error skipping:", error);
+      console.error("Error skipping:", String(error));
       Alert.alert("Error", "Could not proceed.");
     }
   }
