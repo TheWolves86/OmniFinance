@@ -8,6 +8,7 @@ import { presentAccountSheet, subscribeAccountRefresh} from "@/src/components/ac
 import AccountDetailsBottomSheet from '@/src/components/accountDetailsBottomSheet'
 import { deleteAccount } from '@/src/db/repository/account'
 
+//shape of one account object from the database
 type Account = {
   id: string
   name: string
@@ -20,12 +21,13 @@ type Account = {
   createdAt?: number
   updatedAt?: number
 }
-
+//Main accounts screen
 const Accounts = () => {
   const router = useRouter()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [search, setSearch] = useState("")
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
+  //load accounts and refresh whenever account data changes
   useEffect(() => {
     loadAccounts()
 
@@ -37,6 +39,7 @@ const Accounts = () => {
       unsubscribe()
     }
   }, [])
+  //fetch all accounts from the database
   async function loadAccounts() {
     try {
       const data = await getAllAccounts()
@@ -46,18 +49,22 @@ const Accounts = () => {
     }
   }
 
+  //filter accounts based on the search text
   const filteredAccounts = useMemo(() => {
     return accounts.filter((account) => account.name.toLowerCase().includes(search.toLowerCase()))
   }, [accounts, search])
 
+  //open the account details sheet
   function openAccountDetails(account: Account) {
     setSelectedAccount(account)
   }
 
+  //close the account details sheet
   function closeAccountDetails() {
     setSelectedAccount(null)
   }
 
+  //open the edit account bottom sheet
   async function handleEditAccount() {
     if (!selectedAccount) {
       return
@@ -70,6 +77,7 @@ const Accounts = () => {
     })
   }
 
+  //ask for confirmation before deleting an account
   async function handleDeleteAccount() {
     if (!selectedAccount) {
       return
@@ -97,6 +105,7 @@ const Accounts = () => {
     )
   }
 
+  //header with total balance and search for
   const renderHeader = () => (
     <>
       <View style={styles.header}>
@@ -138,8 +147,10 @@ const Accounts = () => {
     </>
   )
 
+  //accounts screen ui starts here
   return (
     <SafeAreaView style={styles.container}>
+    {/* displays all available accounts */}
       <FlatList
         data={filteredAccounts}
         keyExtractor={(item: Account) => item.id}
@@ -354,4 +365,3 @@ const styles = StyleSheet.create({
     marginLeft: 12
   }
 })
-//pani dedo

@@ -8,12 +8,14 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import TransactionDetailsSheet from "@/src/components/transactionDetailsSheet";
 import { presentTransactionSheet, subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
 
+//main screen showing all transactions
 export default function ActivityPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const detailsSheetRef = React.useRef<BottomSheetModal>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
+  //load every transaction from the database
   const loadTransactions = useCallback(async () => {
     try {
       const data = await getAllTransaction();
@@ -23,12 +25,14 @@ export default function ActivityPage() {
     }
   }, []);
 
+  //reload transactions whenever this screen becomes active 
   useFocusEffect(
     useCallback(() => {
       loadTransactions();
     }, [loadTransactions])
   );
 
+  //refresh the list when a transaction is added, edited or deleted
   useEffect(() => {
     const unsubscribe = subscribeTransactionRefresh(() => {
       loadTransactions();
@@ -37,13 +41,16 @@ export default function ActivityPage() {
     return unsubscribe;
   }, [loadTransactions]);
 
+  //search, group and sort transactions by date
   const sortedGroups = React.useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
+    //filter transactions using the search text
     const filteredTransactions = transactions.filter((item) => {
       const displayTitle = item?.title?.trim() ? item.title : item?.categoryName || "";
       return displayTitle.toLowerCase().includes(normalizedSearch);
     });
 
+    //group transactions into today, yesterday and older dates
     const grouped = filteredTransactions.reduce((acc: any[], item: any) => {
       const date = new Date(item?.transactionDate ?? Date.now());
 
@@ -63,6 +70,7 @@ export default function ActivityPage() {
       });
       let sectionOrder = 2;
 
+      //show friendly labels for recent transactions
       if (transactionDay.getTime() === today.getTime()) {
         sectionTitle = "TODAY";
         sectionOrder = 0;
@@ -88,14 +96,17 @@ export default function ActivityPage() {
     return grouped.sort((a: any, b: any) => a.order - b.order);
   }, [transactions, search]);
 
+  //activity screen ui starts here
   return (
     <SafeAreaView style={styles.container}>
+      {/* display transactions grouped by date */}
       <SectionList
         sections={sortedGroups}
         keyExtractor={(item) => String(item?.id ?? Math.random())}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        //top sections with app title and search bar
         ListHeaderComponent={
           <View style={styles.header}>
             <View style={styles.headerTop}>
@@ -130,14 +141,17 @@ export default function ActivityPage() {
             </View>
           </View>
         }
+        // show this when there are no transactions
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No transactions yet</Text>
           </View>
         }
+        //display the date heading for each group
         renderSectionHeader={({ section }) => (
           <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
+        //render a single transaction card
         renderItem={({ item }) => {
           const displayTitle = item?.title?.trim() ? item.title : item?.categoryName || "Transaction";
           const displayAmount = Number(item?.amount ?? 0).toLocaleString("en-IN", {
@@ -146,6 +160,7 @@ export default function ActivityPage() {
           const typeColor = item?.type === "income" ? "#0F9D58" : "#EF4444";
 
           return (
+            //open transaction details when tapped 
             <Pressable style={styles.transactionCard} onPress={() => {
               setSelectedTransaction(item);
               detailsSheetRef.current?.present();
@@ -163,6 +178,7 @@ export default function ActivityPage() {
           );
         }}
       />
+      {/* bottom sheet for viewing transaction details */}
       <TransactionDetailsSheet
         ref={detailsSheetRef}
         transaction={selectedTransaction}
