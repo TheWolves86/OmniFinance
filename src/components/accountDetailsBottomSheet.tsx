@@ -2,27 +2,16 @@
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Ionicons from "@expo/vector-icons/Ionicons"
-
-type AccountDetails = {
-  id: string
-  name: string
-  type: string
-  balance: number
-  currency: string
-  icon?: string | null
-  color?: string | null
-  isDefault?: boolean
-  createdAt?: number
-}
+import type { Account } from "@/src/types/models"
 
 type Props = {
-  account: AccountDetails | null
+  account: Account | null
   onClose: () => void
   onEdit: () => void
   onDelete: () => void
 }
 
-const AccountDetailsBottomSheet = forwardRef<any, Props>((props, _ref) => {
+const AccountDetailsBottomSheet = forwardRef<View, Props>((props, _ref) => {
   const insets = useSafeAreaInsets()
   //format account details for display
   const balanceText = props.account?.balance != null ? `₹${props.account.balance.toLocaleString("en-IN")}` : "-"

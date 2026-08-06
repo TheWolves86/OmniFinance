@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Pressable } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { getDashboardData, DashboardData } from '@/src/services/dashboardService'
 import { subscribeTransactionRefresh } from '@/src/components/transactionSheetController'
+import { subscribeAccountRefresh } from '@/src/components/accountSheetController'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from "expo-router"
@@ -17,8 +18,14 @@ const Dashboard = () => {
     const unsubscribe = subscribeTransactionRefresh(() => {
       loadDashboard()
     })
+    const unsubscribeAccounts = subscribeAccountRefresh(() => {
+      loadDashboard()
+    })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+      unsubscribeAccounts()
+    }
   }, [])
 
   async function loadDashboard() {

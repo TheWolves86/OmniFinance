@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -49,7 +49,8 @@ const Gemini = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
+      <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <View style={styles.iconContainer}>
             <Text style={styles.iconText}>✨</Text>
@@ -102,7 +103,8 @@ const Gemini = () => {
             AI features will be unavailable until a key is added.
           </Text>
         </View>
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 };
@@ -117,6 +119,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: 20
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     alignItems: "center",

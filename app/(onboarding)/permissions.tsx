@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Switch, Alert} from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Switch, Alert, PermissionsAndroid, Platform} from 'react-native'
 import React, { useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -66,7 +66,27 @@ const PermissionsPage = () => {
                             </View>
                             <Switch
                             value={smsEnabled}
-                            onValueChange={setSmsEnabled}/>
+                            disabled={Platform.OS !== "android"}
+                            onValueChange={async (value) => {
+                                if (!value || Platform.OS !== "android") {
+                                    setSmsEnabled(false);
+                                    return;
+                                }
+                                try {
+                                    const result = await PermissionsAndroid.requestMultiple([
+                                        PermissionsAndroid.PERMISSIONS.READ_SMS,
+                                        PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+                                    ]);
+                                    setSmsEnabled(
+                                        result[PermissionsAndroid.PERMISSIONS.READ_SMS] === PermissionsAndroid.RESULTS.GRANTED &&
+                                        result[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED
+                                    );
+                                } catch (error) {
+                                    console.error("Error requesting SMS permissions:", error);
+                                    setSmsEnabled(false);
+                                    Alert.alert("Error", "Could not request SMS permissions.");
+                                }
+                            }}/>
                         </View>
                     </View>
                     {/* Small info text */}

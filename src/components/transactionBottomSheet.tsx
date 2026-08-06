@@ -1,5 +1,6 @@
 ﻿import React, { forwardRef, useMemo, useCallback, useState, useRef, useEffect, useImperativeHandle } from "react";
 import {BottomSheetBackdrop,BottomSheetModal,BottomSheetScrollView, BottomSheetTextInput} from "@gorhom/bottom-sheet";
+import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { LayoutAnimation, Platform, View, Text, Pressable, StyleSheet, FlatList, Alert} from "react-native"
 import SwitchSelector from "react-native-switch-selector"
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -9,6 +10,8 @@ import { addTransaction, editTransactionService } from "@/src/services/transacti
 import { getAllAccounts } from "@/src/db/repository/account";
 import { getExpenseCategories, getIncomeCategory } from "@/src/db/repository/category";
 import { subscribeTransactionSheet, dismissTransactionSheet, emitTransactionChanged, registerTransactionSheet, TransactionSheetPayload } from "@/src/components/transactionSheetController";
+import { subscribeAccountRefresh } from "@/src/components/accountSheetController";
+import type { TransactionType } from "@/src/types/models";
 
 type Account = {
   id: string;
@@ -39,7 +42,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
 
   //dark background behind the sheet
   const renderBackDrop = useCallback(
-    (backdropProps: any) => (
+    (backdropProps: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
         {...backdropProps}
         appearsOnIndex={0}
@@ -81,10 +84,12 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
     loadAccounts();
   }, []);
 
-  //reload categories whenever transaction type changes
+  //refresh the account choices after an account is created, edited, or deleted
   useEffect(() => {
-    loadCategories();
-  }, [transactionType]);
+    return subscribeAccountRefresh(() => {
+      void loadAccounts();
+    });
+  }, []);
 
   //listen for create or edit requests
   useEffect(() => {
@@ -182,7 +187,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
   };
 
   //switch between income and expense
-  const handleTypeChange = (value: "income" | "expense") => {
+  const handleTypeChange = (value: TransactionType) => {
     setTransactionType(value);
     setSelectedCategory("");
     void loadCategories(false, value);
@@ -261,7 +266,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => (ref as React.RefObject<BottomSheetModal>).current?.dismiss()}>
+          <Pressable onPress={() => modalRef.current?.dismiss()}>
             <Text style={styles.cancel}>Cancel</Text>
           </Pressable>
 
@@ -275,7 +280,8 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         </View>
         <View style={styles.switchContainer}>
           <SwitchSelector
-            initial={1}
+             key={transactionType}
+             initial={transactionType === "income" ? 0 : 1}
             valuePadding={2}
             borderRadius={12}
             height={38}
@@ -285,7 +291,9 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             buttonColor="#ffffff"
             backgroundColor="#F1F3F6"
             hasPadding
-            onPress={(value: any) => handleTypeChange(value as "expense" | "income")}
+             onPress={(value: string | number) => {
+               if (value === "income" || value === "expense") handleTypeChange(value);
+             }}
             options={[
               {
                 label: "Income",
@@ -321,14 +329,13 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
             </Text>
             <BottomSheetTextInput
               ref={amountInputRef}
-              value={
-                amount === "" ? "" : Number(amount).toLocaleString("en-IN")
-              }
-              onChangeText={(text) => {
-                const clean = text.replace(/\D/g, "");
-                setAmount(clean);
-              }}
-              keyboardType="numeric"
+               value={amount}
+               onChangeText={(text) => {
+                 const clean = text.replace(/,/g, "").replace(/[^0-9.]/g, "");
+                 const [whole, ...fraction] = clean.split(".");
+                 setAmount(fraction.length > 0 ? `${whole}.${fraction.join("")}` : whole);
+               }}
+               keyboardType="decimal-pad"
               placeholder="0"
               placeholderTextColor="#C5CAD3"
               cursorColor="#0B1D3A"

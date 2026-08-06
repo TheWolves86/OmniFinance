@@ -1,11 +1,12 @@
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { Transaction } from "@/src/types/models";
 
 export type TransactionSheetMode = "create" | "edit";
 
 //data passed whenever the transaction sheet opens
 export type TransactionSheetPayload = {
   mode: TransactionSheetMode;
-  transaction?: any;
+  transaction?: Transaction;
 };
 
 //stores a reference to the transaction bottom sheet

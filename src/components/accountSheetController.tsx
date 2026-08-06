@@ -1,10 +1,11 @@
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { Account } from "@/src/types/models";
 
 export type AccountSheetMode = "create" | "edit";
 
 export type AccountSheetPayload = {
   mode: AccountSheetMode;
-  account?: any;
+  account?: Account;
 };
 
 //keep track of the account bottom sheet

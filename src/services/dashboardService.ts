@@ -2,6 +2,10 @@ import { getAllGoals } from "@/src/db/repository/goal";
 import { getAllBudgets } from "@/src/db/repository/budget";
 import { getRecentTransactions } from "@/src/db/repository/transaction";
 import { getTotalBalance, getMonthlyIncome, getMonthlyExpense } from "@/src/db/repository/dashboard";
+import type { Transaction } from "@/src/types/models";
+
+type DashboardGoal = { savedAmount: number };
+type DashboardBudget = { limit: number };
 
 export type DashboardData = {
     totalBalance: number;
@@ -9,7 +13,7 @@ export type DashboardData = {
     monthlyExpense: number;
     totalSaved: number;
     budgetUsed: number;
-    recentTransactions: any[];
+    recentTransactions: Transaction[];
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -31,12 +35,12 @@ export async function getDashboardData(): Promise<DashboardData> {
         ]);
 
         const totalSaved = goals.reduce(
-            (sum: number, goal: any) => sum + goal.savedAmount,
+            (sum: number, goal: DashboardGoal) => sum + goal.savedAmount,
             0
         );
 
         const totalBudget = budgets.reduce(
-            (sum: number, budget: any) => sum + budget.limit,
+            (sum: number, budget: DashboardBudget) => sum + budget.limit,
             0
         )
 

@@ -2,25 +2,14 @@ import { StyleSheet, Text, View, Pressable, TextInput, FlatList, Alert } from 'r
 import React, { useEffect, useState, useMemo } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { getAllAccounts } from "@/src/db/repository/account"
+import { getAllAccounts, getTransactionCountForAccount } from "@/src/db/repository/account"
 import { useRouter } from "expo-router";
 import { presentAccountSheet, subscribeAccountRefresh} from "@/src/components/accountSheetController"
 import AccountDetailsBottomSheet from '@/src/components/accountDetailsBottomSheet'
 import { deleteAccount } from '@/src/db/repository/account'
+import { emitAccountChanged } from "@/src/components/accountSheetController"
+import type { Account } from "@/src/types/models"
 
-//shape of one account object from the database
-type Account = {
-  id: string
-  name: string
-  type: string
-  balance: number
-  currency: string
-  icon?: string | null
-  color?: string | null
-  isDefault: boolean
-  createdAt?: number
-  updatedAt?: number
-}
 //Main accounts screen
 const Accounts = () => {
   const router = useRouter()
@@ -65,7 +54,7 @@ const Accounts = () => {
   }
 
   //open the edit account bottom sheet
-  async function handleEditAccount() {
+  function handleEditAccount() {
     if (!selectedAccount) {
       return
     }
@@ -93,9 +82,15 @@ const Accounts = () => {
           style: "destructive",
           onPress: async () => {
             try {
+              const transactionCount = await getTransactionCountForAccount(selectedAccount.id)
+              if (transactionCount > 0) {
+                Alert.alert("Cannot delete account", "Move or delete its transactions first.")
+                return
+              }
               await deleteAccount(selectedAccount.id)
               closeAccountDetails()
-              loadAccounts()
+              await loadAccounts()
+              emitAccountChanged()
             } catch (error) {
               console.error(error)
             }
@@ -153,7 +148,7 @@ const Accounts = () => {
     {/* displays all available accounts */}
       <FlatList
         data={filteredAccounts}
-        keyExtractor={(item: Account) => item.id}
+        keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -178,7 +173,7 @@ const Accounts = () => {
           offset: 73 * index,
           index,
         })}
-        renderItem={({item}: { item: Account }) => (
+         renderItem={({item}) => (
           <Pressable style={styles.accountCard} onPress={() => openAccountDetails(item)}>
             <View style={styles.accountIcon}>
               <Ionicons name="wallet-outline" size={18} color="#0B1D3A"/>

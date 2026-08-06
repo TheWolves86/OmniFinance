@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView, BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { Pressable, StyleSheet, Text, View, Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -121,7 +122,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
   //dark background behind the bottom sheet
   const renderBackdrop = useMemo(
     () =>
-      (backdropProps: any) => (
+      (backdropProps: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop
           {...backdropProps}
           appearsOnIndex={0}

@@ -3,11 +3,12 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@g
 import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import { deleteTransactionService } from "@/src/services/transactionService";
 import { emitTransactionChanged } from "@/src/components/transactionSheetController";
+import type { Transaction } from "@/src/types/models";
 
 type TransactionDetailsSheetProps = {
-  transaction: any;
-  onEdit?: (transaction: any) => void;
-  onDelete?: (transaction: any) => void;
+  transaction: Transaction | null;
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (transaction: Transaction) => void;
 };
 
 //small reusable row for showing transaction details
@@ -27,7 +28,7 @@ export const TransactionDetailsSheet = forwardRef<BottomSheetModal, TransactionD
 
   //dark overlay behind the bottom sheet
   const renderBackDrop = useCallback(
-    (backdropProps: any) => (
+    (backdropProps: React.ComponentProps<typeof BottomSheetBackdrop>) => (
       <BottomSheetBackdrop
         {...backdropProps}
         appearsOnIndex={0}

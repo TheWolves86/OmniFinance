@@ -7,13 +7,14 @@ import { useFocusEffect } from "expo-router";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import TransactionDetailsSheet from "@/src/components/transactionDetailsSheet";
 import { presentTransactionSheet, subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
+import type { Transaction, TransactionSection } from "@/src/types/models";
 
 //main screen showing all transactions
 export default function ActivityPage() {
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
   const detailsSheetRef = React.useRef<BottomSheetModal>(null);
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   //load every transaction from the database
   const loadTransactions = useCallback(async () => {
@@ -42,7 +43,7 @@ export default function ActivityPage() {
   }, [loadTransactions]);
 
   //search, group and sort transactions by date
-  const sortedGroups = React.useMemo(() => {
+  const sortedGroups = React.useMemo<TransactionSection[]>(() => {
     const normalizedSearch = search.trim().toLowerCase();
     //filter transactions using the search text
     const filteredTransactions = transactions.filter((item) => {
@@ -51,13 +52,13 @@ export default function ActivityPage() {
     });
 
     //group transactions into today, yesterday and older dates
-    const grouped = filteredTransactions.reduce((acc: any[], item: any) => {
+    const grouped = filteredTransactions.reduce((acc: Map<string, TransactionSection>, item) => {
       const date = new Date(item?.transactionDate ?? Date.now());
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const yesterday = new Date();
+      const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
 
       const transactionDay = new Date(date);
@@ -79,11 +80,11 @@ export default function ActivityPage() {
         sectionOrder = 1;
       }
 
-      const existing = acc.find((section: any) => section.title === sectionTitle);
+      const existing = acc.get(sectionTitle);
       if (existing) {
         existing.data.push(item);
       } else {
-        acc.push({
+        acc.set(sectionTitle, {
           title: sectionTitle,
           data: [item],
           order: sectionOrder,
@@ -91,9 +92,9 @@ export default function ActivityPage() {
       }
 
       return acc;
-    }, []);
+    }, new Map());
 
-    return grouped.sort((a: any, b: any) => a.order - b.order);
+    return Array.from(grouped.values()).sort((a, b) => a.order - b.order);
   }, [transactions, search]);
 
   //activity screen ui starts here
@@ -102,7 +103,7 @@ export default function ActivityPage() {
       {/* display transactions grouped by date */}
       <SectionList
         sections={sortedGroups}
-        keyExtractor={(item) => String(item?.id ?? Math.random())}
+        keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -189,7 +190,8 @@ export default function ActivityPage() {
         onDelete={(transaction) => {
           if (transaction?.id) {
             detailsSheetRef.current?.dismiss();
-            presentTransactionSheet({ mode: "create" });
+            setSelectedTransaction(null);
+            void loadTransactions();
           }
         }}
       />
