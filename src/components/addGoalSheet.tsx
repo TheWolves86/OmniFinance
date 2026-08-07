@@ -164,7 +164,16 @@ const addGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
             handleIndicatorStyle={styles.handle}
             backgroundStyle={styles.background}
         >
-
+            <BottomSheetScrollView>
+                <View style={styles.header}>
+                    <Pressable onPress={() => modalRef.current?.dismiss()}>
+                        <Text style={styles.cancel}>Cancel</Text>
+                    </Pressable>
+                    <Text style={styles.headerTitle}>
+                        {sheetMode === "edit" ? "Edit Goal": "New Goal"}
+                    </Text>
+                </View>
+            </BottomSheetScrollView>
         </BottomSheetModal>
     )
 })
@@ -196,5 +205,115 @@ const styles = StyleSheet.create({
         color: COLORS.gray,
         fontWeight: "500"
     },
-    
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: COLORS.navy
+    },
+    save: {
+        fontSize: 17,
+        fontWeight: "700",
+        color: COLORS.navy
+    },
+    field: {
+        marginBottom: 26
+    },
+    label: {
+        fontSize: 11,
+        fontWeight: "700",
+        color: COLORS.muted,
+        letterSpacing: 1,
+        marginBottom: 10
+    },
+    input: {
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        borderRadius: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 14,
+        fontSize: 15,
+        color: COLORS.navy
+    },
+    amountRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    rupee: {
+        fontSize: 34,
+        color: "#7A8090",
+        marginRight: 8,
+        fontWeight: "600"
+    },
+    amountInput: {
+        fontSize: 24,
+        fontWeight: "800",
+        color: COLORS.navy,
+        padding: 0,
+        margin: 0,
+        minWidth: 150
+    },
+    descriptionInput: {
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        borderRadius: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 14,
+        minHeight: 90,
+        fontSize: 15,
+        color: COLORS.navy
+    },
+    section: {
+        marginTop: 2
+    },
+    sectionTitle: {
+        fontSize: 11,
+        fontWeight: "700",
+        color: COLORS.muted,
+        letterSpacing: 1,
+        marginBottom: 10
+    },
+    dateRow: {
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        borderRadius: 16,
+        padding: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between"
+    },
+    dateLeft: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    iconBox: {
+        width: 42,
+        height: 42,
+        borderRadius: 12,
+        backgroundColor: "#F1F3F6",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12
+    },
+    calenderIcon: {
+        fontSize: 19
+    },
+    dateTitle: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: COLORS.navy
+    },
+    dateValue: {
+        marginTop: 3,
+        fontSize: 13,
+        color: COLORS.gray
+    },
+    chevron: {
+        fontSize: 28,
+        color: "#9CA3AF",
+        fontWeight: "300"
+    }
 })
