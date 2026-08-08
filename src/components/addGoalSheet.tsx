@@ -172,11 +172,83 @@ const addGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
                     <Text style={styles.headerTitle}>
                         {sheetMode === "edit" ? "Edit Goal": "New Goal"}
                     </Text>
+                    <Pressable onPress={handleSave}>
+                        <Text style={styles.save}>
+                            {sheetMode === "edit" ? "Update": "Save"}
+                        </Text>
+                    </Pressable>
+                </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Goal Name</Text>
+                    <BottomSheetTextInput
+                        value={title}
+                        onChangeText={setTitle}
+                        placeholder="e.g. New Laptop"
+                        placeholderTextColor="#A1A8B5"
+                        cursorColor={COLORS.navy}
+                        style={styles.input}
+                    />
+                </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Target Amount</Text>
+                    <View style={styles.amountRow}>
+                        <Text style={styles.rupee}>₹</Text>
+                        <BottomSheetTextInput 
+                            value={targetAmount === "" ? "" : Number(targetAmount).toLocaleString("en-IN")}
+                            onChangeText={(text) => {
+                                const clean = text.replace(/\D/g, "")
+                                setTargetAmount(clean)
+                            }}
+                            keyboardType="numeric"
+                            placeholder="0"
+                            placeholderTextColor="#C5CAD3"
+                            cursorColor={COLORS.navy}
+                            style={styles.amountInput}
+                        />
+                    </View>
+                </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Description</Text>
+                    <BottomSheetTextInput 
+                        value={description}
+                        onChangeText={setDescription}
+                        placeholder="What are you saving for?"
+                        placeholderTextColor="#A1A8A5"
+                        cursorColor={COLORS.navy}
+                        multiline={true}
+                        textAlignVertical="top"
+                        style={styles.descriptionInput}
+                    />
+                </View>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Target Date</Text>
+                    <Pressable style={styles.dateRow} onPress={() => setIsDatePickerOpen(true)}>
+                        <View style={styles.dateLeft}>
+                            <View style={styles.iconBox}>
+                                <Text style={styles.calenderIcon}>📅</Text>
+                            </View>
+                            <View>
+                                <Text style={styles.dateTitle}>Target Date</Text>
+                                <Text style={styles.dateValue}>{formattedDate}</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.chevron}>›</Text>
+                    </Pressable>
+                    {isDatePickerOpen && (
+                        <DateTimePicker 
+                            value={targetDate ?? new Date()}
+                            mode="date"
+                            display={Platform.OS === "ios" ? "spinner" : "default"}
+                            onChange={handleDateChange}
+                        />
+                    )}
                 </View>
             </BottomSheetScrollView>
         </BottomSheetModal>
     )
 })
+
+addGoalSheet.displayName = "AddGoalSheet"
 
 const styles = StyleSheet.create({
     background: {
