@@ -36,7 +36,7 @@ const AccountDetailsBottomSheet = forwardRef<View, Props>((props, _ref) => {
               </Pressable>
             </View>
 
-            //account summary card
+            {/* account summary card */}
             <View style={styles.summaryCard}>
               <View style={[styles.iconCircle, { backgroundColor: props.account?.color ?? "#3B82F6" }] }>
                 <Ionicons name={(props.account?.icon as any) ?? "wallet-outline"} size={22} color="#FFFFFF" />
