@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   backdrop: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     backgroundColor: "#F8FAFC",

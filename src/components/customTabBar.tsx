@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Pressable, Platform, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs/types";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const NAVY = "#0B1D3A";
 const NAVY_MUTED = "#8A93A6";
