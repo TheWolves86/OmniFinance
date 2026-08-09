@@ -14,7 +14,7 @@ const COLORS = {
     border: "#E8ECF2"
 }
 
-const addGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
+const AddGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
     const modalRef = useRef<BottomSheetModal>(null)
 
     const snapPoints = useMemo(() => ["%80"], [])
@@ -248,7 +248,9 @@ const addGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
     )
 })
 
-addGoalSheet.displayName = "AddGoalSheet"
+AddGoalSheet.displayName = "AddGoalSheet"
+
+export default AddGoalSheet
 
 const styles = StyleSheet.create({
     background: {
