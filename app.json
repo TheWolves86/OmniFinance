@@ -10,7 +10,10 @@
       "supportsTablet": true
     },
     "android": {
-      "permissions": ["READ_SMS", "RECEIVE_SMS"],
+      "permissions": [
+        "READ_SMS",
+        "RECEIVE_SMS"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -24,18 +27,10 @@
     "scheme": "omnifinance",
     "plugins": [
       "expo-router",
-      "expo-status-bar",
       "expo-sqlite",
-      "expo-secure-store"
-    ],
-    "doctor": {
-      "reactNativeDirectoryCheck": {
-        "exclude": [
-          "react-native-safe-area-view",
-          "react-native-switch-selector"
-        ],
-        "listUnknownPackages": false
-      }
-    }
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      "expo-font"
+    ]
   }
 }

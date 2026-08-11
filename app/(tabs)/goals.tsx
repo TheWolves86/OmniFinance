@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: 22,
-    bottom: 56,
+    bottom: 16,
     width: 58,
     height: 58,
     borderRadius: 29,
@@ -379,4 +379,3 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   }
 })
-//bro 

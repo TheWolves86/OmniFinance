@@ -17,7 +17,7 @@ const COLORS = {
 const AddGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
     const modalRef = useRef<BottomSheetModal>(null)
 
-    const snapPoints = useMemo(() => ["%80"], [])
+    const snapPoints = useMemo(() => ["80%"], [])
 
     const [sheetMode, setSheetMode] = useState<"create" | "edit">("create")
     const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
@@ -164,7 +164,10 @@ const AddGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
             handleIndicatorStyle={styles.handle}
             backgroundStyle={styles.background}
         >
-            <BottomSheetScrollView>
+            <BottomSheetScrollView
+                contentContainerStyle={styles.content}
+                showsVerticalScrollIndicator={false}
+            >
                 <View style={styles.header}>
                     <Pressable onPress={() => modalRef.current?.dismiss()}>
                         <Text style={styles.cancel}>Cancel</Text>
@@ -265,6 +268,7 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 22,
+        paddingTop: 8,
         paddingBottom: 40
     },
     header: {
