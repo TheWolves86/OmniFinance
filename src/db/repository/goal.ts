@@ -56,6 +56,6 @@ export async function allocateMoneyToGoal(
             goalId
         );
     } catch (error) {
-        console.error("Error allocating money to goal", error)
+        console.error("Error allocating money to goal: " + String(error));
     }
 }
