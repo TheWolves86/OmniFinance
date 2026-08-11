@@ -101,6 +101,9 @@ const Dashboard = () => {
       <Pressable onPress={() => router.push('/accounts')}>
         <Text>Go to accounts</Text>
       </Pressable>
+      <Pressable onPress={() => router.push('/loans')}>
+        <Text>Go to loans</Text>
+      </Pressable>
     </SafeAreaView>
   )
 }

@@ -68,6 +68,7 @@ export async function initializeDatabase(): Promise<void> {
     CREATE TABLE IF NOT EXISTS loans (
       id TEXT PRIMARY KEY NOT NULL,
       title TEXT NOT NULL,
+      lender TEXT NOT NULL DEFAULT '',
       principal REAL NOT NULL,
       interest_rate REAL NOT NULL,
       monthly_amount REAL NOT NULL,
@@ -156,6 +157,11 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_recurring_next_run ON recurring_transactions(next_run);
     CREATE INDEX IF NOT EXISTS idx_budgets_month_year ON budgets(month, year);
   `);
+
+  const loanColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(loans)");
+  if (!loanColumns.some((column) => column.name === "lender")) {
+    await db.execAsync("ALTER TABLE loans ADD COLUMN lender TEXT NOT NULL DEFAULT ''");
+  }
 
   initialized = true;
 }
