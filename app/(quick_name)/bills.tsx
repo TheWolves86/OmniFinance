@@ -5,7 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { getAllAccounts } from "@/src/db/repository/account";
 import { getExpenseCategories } from "@/src/db/repository/category";
-import { deleteBill, getAllBills, type BillRecord } from "@/src/db/repository/bills";
+import { deleteBill, getAllBills, resetBillsDueSoon, type BillRecord } from "@/src/db/repository/bills";
 import { payBill } from "@/src/services/billService";
 import { emitAccountChanged } from "@/src/components/accountSheetController";
 import { emitTransactionChanged } from "@/src/components/transactionSheetController";
@@ -20,7 +20,7 @@ export default function BillsPage() {
   const [payingBillId, setPayingBillId] = useState<string | null>(null);
 
   const loadBills = useCallback(async () => {
-    try { setBills(await getAllBills()); }
+    try { await resetBillsDueSoon(); setBills(await getAllBills()); }
     catch (error) { Alert.alert("Could not load bills", error instanceof Error ? error.message : String(error)); }
   }, []);
 

@@ -8,6 +8,7 @@ import React, {
 
 import {
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -252,7 +253,7 @@ const BillsBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
             <DateTimePicker
               value={dueDate}
               mode="date"
-              display="default"
+              display={Platform.OS === "android" ? "calendar" : "spinner"}
               onChange={handleDateChange}
             />
           )}

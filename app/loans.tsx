@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { getAllLoans, type Loan } from "@/src/db/repository/loan";
-import { presentLoanSheet, subscribeLoanRefresh } from "@/src/components/loanSheetController";
+import { deleteLoan, getAllLoans, type Loan } from "@/src/db/repository/loan";
+import { emitLoanChanged, presentLoanSheet, subscribeLoanRefresh } from "@/src/components/loanSheetController";
 import AddLoanSheet from "@/src/components/addLoanSheet";
 
 const money = (amount: number) => `₹${Math.max(0, amount).toLocaleString("en-IN")}`;
@@ -20,6 +20,24 @@ export default function LoansPage() {
     return () => { unsubscribe(); };
   }, [loadLoans]);
 
+  const handleDelete = (loan: Loan) => {
+    Alert.alert("Delete loan?", `This will permanently remove ${loan.name}.`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteLoan(loan.id);
+            emitLoanChanged();
+          } catch (error) {
+            Alert.alert("Could not delete loan", error instanceof Error ? error.message : String(error));
+          }
+        },
+      },
+    ]);
+  };
+
   return <SafeAreaView style={styles.container}>
     <FlatList
       data={loans}
@@ -32,14 +50,14 @@ export default function LoansPage() {
         const paidAmount = Math.max(0, item.totalAmount - item.remainingAmount);
         const progress = item.totalAmount > 0 ? Math.min(1, paidAmount / item.totalAmount) : 0;
         const monthsLeft = Math.max(0, item.totalMonths - item.paidMonths);
-        return <Pressable style={styles.card} onPress={() => presentLoanSheet({ mode: "edit", loan: item })}>
+        return <Pressable style={styles.card} onPress={() => presentLoanSheet({ mode: "edit", loan: item })} onLongPress={() => handleDelete(item)} delayLongPress={400}>
           <View style={styles.cardTop}><View style={styles.nameBlock}><View style={styles.icon}><Ionicons name="home-outline" size={18} color="#0B1D3A" /></View><View><Text style={styles.name} numberOfLines={1}>{item.name}</Text><Text style={styles.lender}>{item.lender}</Text></View></View><View style={styles.remainingBlock}><Text style={styles.remainingAmount}>{money(item.remainingAmount)}</Text><Text style={styles.remainingLabel}>Remaining</Text></View></View>
           <View style={styles.details}><Text style={styles.paid}>{money(paidAmount)} <Text style={styles.muted}>Paid</Text></Text><Text style={styles.muted}>{monthsLeft} months left</Text></View>
           <View style={styles.progressBackground}><View style={[styles.progressFill, { width: `${progress * 100}%` }]} /></View>
         </Pressable>;
       }}
     />
-    <Pressable style={styles.fab} onPress={() => presentLoanSheet({ mode: "create" })}><Ionicons name="add" size={30} color="#FFFFFF" /></Pressable>
+    <Pressable style={[styles.fab, { bottom: 16 }]} onPress={() => presentLoanSheet({ mode: "create" })}><Ionicons name="add" size={30} color="#FFFFFF" /></Pressable>
     <AddLoanSheet />
   </SafeAreaView>;
 }
