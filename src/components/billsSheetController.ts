@@ -49,5 +49,5 @@ export function subscribeBillsRefresh(listener: () => void){
 }
 
 export function emitBillChanged(){
-    refreshListeners.forEach
+    refreshListeners.forEach((listener) => listener());
 }

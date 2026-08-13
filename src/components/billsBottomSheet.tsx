@@ -24,9 +24,8 @@ import {
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { randomUUID } from "expo-crypto";
-
-import { db } from "@/src/db";
+import { createBill, updateBill } from "@/src/db/repository/bills";
+import { getExpenseCategories } from "@/src/db/repository/category";
 import {
   dismissBillsSheet,
   emitBillChanged,
@@ -59,9 +58,9 @@ const BillsBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
 
       if (nextPayload.mode === "edit" && nextPayload.bill) {
         setEditingBillId(nextPayload.bill.id);
-        setBillName(nextPayload.bill.name ?? "");
+        setBillName(nextPayload.bill.title ?? "");
         setAmount(String(nextPayload.bill.amount ?? ""));
-        setCategory(nextPayload.bill.category ?? "");
+        setCategory(nextPayload.bill.categoryName ?? "");
 
         setDueDate(
           nextPayload.bill.dueDate
@@ -119,41 +118,26 @@ const BillsBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
     }
 
     try {
-      const now = Date.now();
+      const categories = await getExpenseCategories();
+      const matchedCategory = categories.find((item: any) => item.name.toLowerCase() === category.trim().toLowerCase());
+      const categoryId = matchedCategory?.id ?? null;
 
       if (payload.mode === "edit" && editingBillId) {
-        await db.runAsync(
-          `UPDATE bills
-           SET name = ?,
-               amount = ?,
-               category = ?,
-               due_date = ?,
-               updated_at = ?
-           WHERE id = ?`,
-          trimmedName,
-          numericAmount,
-          category.trim() || null,
-          dueDate.getTime(),
-          now,
-          editingBillId
-        );
+        await updateBill(editingBillId, {
+          title: trimmedName,
+          amount: numericAmount,
+          categoryId,
+          dueDate: dueDate.getTime(),
+          notes: null,
+        });
       } else {
-        const id = randomUUID();
-
-        await db.runAsync(
-          `INSERT INTO bills
-           (id, name, amount, category, due_date, is_paid, paid_at, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          id,
-          trimmedName,
-          numericAmount,
-          category.trim() || null,
-          dueDate.getTime(),
-          0,
-          null,
-          now,
-          now
-        );
+        await createBill({
+          title: trimmedName,
+          amount: numericAmount,
+          dueDate: dueDate.getTime(),
+          categoryId,
+          notes: null,
+        });
       }
 
       emitBillChanged();

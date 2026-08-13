@@ -132,6 +132,7 @@ export async function initializeDatabase(): Promise<void> {
       category_id TEXT,
       account_id TEXT,
       notes TEXT,
+      paid_at INTEGER,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
@@ -161,6 +162,11 @@ export async function initializeDatabase(): Promise<void> {
   const loanColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(loans)");
   if (!loanColumns.some((column) => column.name === "lender")) {
     await db.execAsync("ALTER TABLE loans ADD COLUMN lender TEXT NOT NULL DEFAULT ''");
+  }
+
+  const billColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(bills)");
+  if (!billColumns.some((column) => column.name === "paid_at")) {
+    await db.execAsync("ALTER TABLE bills ADD COLUMN paid_at INTEGER");
   }
 
   initialized = true;

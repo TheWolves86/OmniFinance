@@ -104,6 +104,9 @@ const Dashboard = () => {
       <Pressable onPress={() => router.push('/loans')}>
         <Text>Go to loans</Text>
       </Pressable>
+      <Pressable onPress={() => router.push('/bills')}>
+        <Text>Go to bills</Text>
+      </Pressable>
     </SafeAreaView>
   )
 }
@@ -228,4 +231,4 @@ const styles = StyleSheet.create({
     color: '#7B8190',
   },
 })
-//bahut neend a rahi he
+//
