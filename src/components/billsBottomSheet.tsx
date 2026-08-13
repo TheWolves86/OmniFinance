@@ -145,7 +145,7 @@ const BillsBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       resetForm();
       dismissBillsSheet();
     } catch (error) {
-      console.error("Error saving bill:", error);
+      console.error("Error saving bill: " + String(error));
       Alert.alert("Something went wrong", "Could not save the bill.");
     }
   }

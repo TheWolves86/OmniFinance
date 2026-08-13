@@ -142,7 +142,7 @@ const AddGoalSheet = forwardRef<BottomSheetModal>((props, ref) => {
             resetForm()
             dismissGoalSheet()
         } catch (error) {
-            console.error(error)
+            console.error("Error: " + String(error))
             Alert.alert("Something went wrong", "Could not save the goal")
         }
     };

@@ -11,7 +11,7 @@ const money = (amount: number) => `₹${Math.max(0, amount).toLocaleString("en-I
 export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const loadLoans = useCallback(async () => {
-    try { setLoans(await getAllLoans()); } catch (error) { console.error("Error loading loans", error); }
+    try { setLoans(await getAllLoans()); } catch (error) { console.error("Error loading loans: " + String(error)); }
   }, []);
 
   useEffect(() => {

@@ -116,7 +116,7 @@ const AccountBottomSheet = forwardRef<BottomSheetModal>((props, ref) => {
       setCurrency("INR")
       setPayload({ mode: "create" });
     } catch (error) {
-      console.error(error)
+      console.error("Error: " + String(error))
     }
   }
   //dark background behind the bottom sheet

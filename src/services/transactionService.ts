@@ -8,11 +8,11 @@ const reverseBalance = (balance:number, type:string, amount:number) => balance +
 
 export async function addTransaction(data:AddTransactionData) {
   try {
-    await db.withExclusiveTransactionAsync(async (txn) => {
-      const account = await getAccountById(data.accountId, txn);
+    await db.withExclusiveTransactionAsync(async () => {
+      const account = await getAccountById(data.accountId);
       if (!account) throw new Error("Account not found");
-      await createTransaction(data, txn);
-      await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount), txn);
+      await createTransaction(data);
+      await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount));
     });
   } catch (error) {
     throw new Error(`Unable to add transaction: ${String(error)}`);
@@ -20,13 +20,13 @@ export async function addTransaction(data:AddTransactionData) {
 }
 export async function deleteTransactionService(transactionId:string) {
   try {
-    await db.withExclusiveTransactionAsync(async (txn) => {
-      const transaction = await getTransactionById(transactionId, txn);
+    await db.withExclusiveTransactionAsync(async () => {
+      const transaction = await getTransactionById(transactionId);
       if (!transaction) throw new Error("Transaction not found");
-      const account = await getAccountById(transaction.accountId, txn);
+      const account = await getAccountById(transaction.accountId);
       if (!account) throw new Error("Account not found");
-      await deleteTransaction(transactionId, txn);
-      await updateBalance(account.id, reverseBalance(account.balance, transaction.type, transaction.amount), txn);
+      await deleteTransaction(transactionId);
+      await updateBalance(account.id, reverseBalance(account.balance, transaction.type, transaction.amount));
     });
   } catch (error) {
     throw new Error(`Unable to delete transaction: ${String(error)}`);
@@ -34,20 +34,20 @@ export async function deleteTransactionService(transactionId:string) {
 }
 export async function editTransactionService(transactionId:string,data:AddTransactionData) {
   try {
-    await db.withExclusiveTransactionAsync(async (txn) => {
-      const oldTransaction = await getTransactionById(transactionId, txn);
+    await db.withExclusiveTransactionAsync(async () => {
+      const oldTransaction = await getTransactionById(transactionId);
       if (!oldTransaction) throw new Error("Transaction not found");
-      const oldAccount = await getAccountById(oldTransaction.accountId, txn);
+      const oldAccount = await getAccountById(oldTransaction.accountId);
       if (!oldAccount) throw new Error("Old account not found");
-      const newAccount = await getAccountById(data.accountId, txn);
+      const newAccount = await getAccountById(data.accountId);
       if (!newAccount) throw new Error("New account not found");
-      await updateTransaction(transactionId, data, txn);
+      await updateTransaction(transactionId, data);
       if (oldAccount.id === newAccount.id) {
         const restored = reverseBalance(oldAccount.balance, oldTransaction.type, oldTransaction.amount);
-        await updateBalance(oldAccount.id, balanceAfter(restored, data.type, data.amount), txn);
+        await updateBalance(oldAccount.id, balanceAfter(restored, data.type, data.amount));
       } else {
-        await updateBalance(oldAccount.id, reverseBalance(oldAccount.balance, oldTransaction.type, oldTransaction.amount), txn);
-        await updateBalance(newAccount.id, balanceAfter(newAccount.balance, data.type, data.amount), txn);
+        await updateBalance(oldAccount.id, reverseBalance(oldAccount.balance, oldTransaction.type, oldTransaction.amount));
+        await updateBalance(newAccount.id, balanceAfter(newAccount.balance, data.type, data.amount));
       }
     });
   } catch (error) {

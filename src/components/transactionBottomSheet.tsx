@@ -146,7 +146,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         : data.length > 0 ? data[0].id : "";
       setSelectedAccount(matchedAccount);
     } catch (error) {
-      console.error("Error loading accounts:", error);
+      console.error("Error loading accounts: " + String(error));
     }
   }
 
@@ -165,7 +165,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
         setSelectedCategory("");
       }
     } catch (error) {
-      console.error("Error loading categories:", error);
+      console.error("Error loading categories: " + String(error));
     }
   }
 
@@ -242,7 +242,7 @@ const AddTransactionSheet = forwardRef<BottomSheetModal>((props, ref) => {
       resetForm();
       dismissTransactionSheet();
     } catch (error) {
-      console.error(error)
+      console.error("Error: " + String(error))
     }
   }
   //format the date so it looks nice

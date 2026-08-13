@@ -46,19 +46,19 @@ export async function deleteLoan(id: string, tx: any = db) {
 export async function makeLoanPayment(loanId: string, accountId: string, amount: number) {
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Payment must be greater than 0");
   try {
-    await db.withExclusiveTransactionAsync(async (tx) => {
-      const loan = await getLoanById(loanId, tx);
+    await db.withExclusiveTransactionAsync(async () => {
+      const loan = await getLoanById(loanId);
       if (!loan) throw new Error("Loan not found");
       if (!Number.isFinite(loan.monthlyEMI) || loan.monthlyEMI <= 0) throw new Error("This loan has an invalid monthly EMI");
       if (amount > loan.remainingAmount) throw new Error("Payment cannot exceed the remaining loan amount");
-      const account = await tx.getFirstAsync("SELECT balance FROM accounts WHERE id=?", accountId) as { balance: number } | null;
+      const account = await db.getFirstAsync("SELECT balance FROM accounts WHERE id=?", accountId) as { balance: number } | null;
       if (!account) throw new Error("Account not found");
       if (amount > account.balance) throw new Error("Insufficient account balance");
       const remainingAmount = Math.max(0, loan.remainingAmount - amount);
       const paidMonths = Math.min(loan.totalMonths, loan.paidMonths + Math.max(1, Math.round(amount / loan.monthlyEMI)));
       const now = Date.now();
-      await tx.runAsync("UPDATE accounts SET balance=balance-?,updated_at=? WHERE id=? AND balance>=?", amount, now, accountId, amount);
-      await tx.runAsync("UPDATE loans SET remaining_amount=?,paid_months=?,status=?,updated_at=? WHERE id=?", remainingAmount, paidMonths, remainingAmount === 0 ? "completed" : "active", now, loanId);
+      await db.runAsync("UPDATE accounts SET balance=balance-?,updated_at=? WHERE id=? AND balance>=?", amount, now, accountId, amount);
+      await db.runAsync("UPDATE loans SET remaining_amount=?,paid_months=?,status=?,updated_at=? WHERE id=?", remainingAmount, paidMonths, remainingAmount === 0 ? "completed" : "active", now, loanId);
     });
   } catch (error) {
     throw new Error(`Unable to make loan payment: ${String(error)}`);
