@@ -22,7 +22,7 @@ export default function ActivityPage() {
       const data = await getAllTransaction();
       setTransactions(data ?? []);
     } catch (error) {
-      console.error(error);
+      console.error("Error: " + String(error));
     }
   }, []);
 

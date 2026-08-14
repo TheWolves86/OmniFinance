@@ -33,7 +33,7 @@ const Dashboard = () => {
       const data = await getDashboardData()
       setDashboardData(data)
     } catch (error) {
-      console.error(error)
+      console.error("Error: " + String(error))
     }
   }
 

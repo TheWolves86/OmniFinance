@@ -42,7 +42,7 @@ const PermissionsPage = () => {
                                         const { status } = await Camera.requestCameraPermissionsAsync();
                                         setCameraEnabled(status === 'granted');
                                     } catch (error) {
-                                        console.error("Error requesting camera permissions:", error);
+                                        console.error("Error requesting camera permissions: " + String(error));
                                         Alert.alert("Error", "Could not request camera permissions.");
                                         setCameraEnabled(false);
                                     }
@@ -82,7 +82,7 @@ const PermissionsPage = () => {
                                         result[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED
                                     );
                                 } catch (error) {
-                                    console.error("Error requesting SMS permissions:", error);
+                                    console.error("Error requesting SMS permissions: " + String(error));
                                     setSmsEnabled(false);
                                     Alert.alert("Error", "Could not request SMS permissions.");
                                 }

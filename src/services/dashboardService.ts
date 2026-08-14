@@ -58,7 +58,7 @@ export async function getDashboardData(): Promise<DashboardData> {
             recentTransactions,
         };
     } catch (error) {
-        console.error("Error getting dashboard data:", error);
+        console.error("Error getting dashboard data: " + String(error));
         throw error;
     }
 }

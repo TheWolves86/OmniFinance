@@ -31,7 +31,7 @@ export default function GoalsPage() {
       const data = await getAllGoals()
       setGoals((data ?? []) as Goal[])
     } catch (error) {
-      console.error("Error loading goals", error)
+      console.error("Error loading goals: " + String(error))
     }
   }, [])
 

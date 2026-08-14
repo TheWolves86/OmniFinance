@@ -54,18 +54,11 @@ export async function getAllBills(tx: any = db) {
 }
 
 export async function resetBillsDueSoon(tx: any = db) {
-  const paidBills = await tx.getAllAsync<{ id: string; dueDate: number }>(
-    "SELECT id, dueDate FROM bills WHERE is_paid = 1"
-  );
   const now = Date.now();
-  for (const bill of paidBills) {
-    if (bill.dueDate - now <= 10 * 86400000) {
-      await tx.runAsync(
-        "UPDATE bills SET is_paid = 0, paid_at = NULL, updated_at = ? WHERE id = ? AND is_paid = 1",
-        now, bill.id
-      );
-    }
-  }
+  await tx.runAsync(
+    "UPDATE bills SET is_paid = 0, paid_at = NULL, updated_at = ? WHERE is_paid = 1 AND (dueDate - ?) <= ?",
+    now, now, 10 * 86400000
+  );
 }
 
 export async function updateBill(id: string, data: BillInput, tx: any = db) {
@@ -83,7 +76,7 @@ export async function deleteBill(id: string, tx: any = db) {
 }
 
 export async function setBillPaid(id: string, paidAt: number, tx: any = db) {
-  const bill = await tx.getFirstAsync<{ dueDate: number }>("SELECT dueDate FROM bills WHERE id = ?", id);
+  const bill = (await tx.getFirstAsync("SELECT dueDate FROM bills WHERE id = ?", id)) as { dueDate: number } | null;
   if (!bill) throw new Error("Bill not found");
   const nextDueDate = nextMonthlyDueDate(bill.dueDate);
   const result = await tx.runAsync(
