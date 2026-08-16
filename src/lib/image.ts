@@ -1,3 +1,3 @@
 export const Images = {
-  logo: require("@/assets/omnifinancelogo.png"),
+  logo: require("../../assets/omnifinancelogo.png"),
 };

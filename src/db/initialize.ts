@@ -59,11 +59,11 @@ export async function initializeDatabase(): Promise<void> {
     CREATE TABLE IF NOT EXISTS budgets (
       id TEXT PRIMARY KEY NOT NULL,
       category_id TEXT NOT NULL,
-      "limit" REAL NOT NULL,
-      month INTEGER NOT NULL,
-      year INTEGER NOT NULL,
+      amount REAL NOT NULL,
+      month TEXT NOT NULL,
       created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      updated_at INTEGER NOT NULL,
+      UNIQUE(category_id, month)
     );
     CREATE TABLE IF NOT EXISTS loans (
       id TEXT PRIMARY KEY NOT NULL,
@@ -156,8 +156,60 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(is_completed);
     CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(status);
     CREATE INDEX IF NOT EXISTS idx_recurring_next_run ON recurring_transactions(next_run);
-    CREATE INDEX IF NOT EXISTS idx_budgets_month_year ON budgets(month, year);
+    CREATE INDEX IF NOT EXISTS idx_budgets_month ON budgets(month);
   `);
+
+  const budgetColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(budgets)");
+  const hasBudgetAmount = budgetColumns.some((column) => column.name === "amount");
+  const hasBudgetMonth = budgetColumns.some((column) => column.name === "month");
+  const hasLegacyBudgetLimit = budgetColumns.some((column) => column.name === "limit");
+
+  // Rebuild legacy tables even when they already have amount/month: older
+  // schemas can retain a NOT NULL `limit` column that current inserts omit.
+  if (budgetColumns.length > 0 && (!hasBudgetAmount || !hasBudgetMonth || hasLegacyBudgetLimit)) {
+    const tempTableName = `budgets_migration_${Date.now()}`;
+
+    await db.execAsync(`ALTER TABLE budgets RENAME TO ${tempTableName}`);
+    await db.execAsync(`
+      CREATE TABLE budgets (
+        id TEXT PRIMARY KEY NOT NULL,
+        category_id TEXT NOT NULL,
+        amount REAL NOT NULL,
+        month TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        UNIQUE(category_id, month)
+      )
+    `);
+
+    const legacyColumns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${tempTableName})`);
+    const hasLegacyAmount = legacyColumns.some((column) => column.name === "amount");
+    const hasLegacyLimit = legacyColumns.some((column) => column.name === "limit");
+    const hasLegacyMonth = legacyColumns.some((column) => column.name === "month");
+    const hasLegacyYear = legacyColumns.some((column) => column.name === "year");
+
+    const amountExpression = hasLegacyAmount
+      ? (hasLegacyLimit ? 'COALESCE(amount, "limit", 0)' : "COALESCE(amount, 0)")
+      : hasLegacyLimit ? 'COALESCE("limit", 0)' : "0";
+    const monthExpression = hasLegacyMonth && hasLegacyYear
+      ? "CASE WHEN month IS NOT NULL AND year IS NOT NULL THEN (CAST(year AS TEXT) || '-' || printf('%02d', month)) WHEN month IS NOT NULL THEN CAST(month AS TEXT) ELSE strftime('%Y-%m', created_at / 1000, 'unixepoch', 'localtime') END"
+      : hasLegacyMonth
+        ? "CASE WHEN month IS NOT NULL THEN CAST(month AS TEXT) ELSE strftime('%Y-%m', created_at / 1000, 'unixepoch', 'localtime') END"
+        : "strftime('%Y-%m', created_at / 1000, 'unixepoch', 'localtime')";
+
+    await db.execAsync(`
+      INSERT INTO budgets (id, category_id, amount, month, created_at, updated_at)
+      SELECT
+        id,
+        category_id,
+        ${amountExpression},
+        ${monthExpression},
+        created_at,
+        updated_at
+      FROM ${tempTableName}
+    `);
+    await db.execAsync(`DROP TABLE ${tempTableName}`);
+  }
 
   const loanColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(loans)");
   if (!loanColumns.some((column) => column.name === "lender")) {

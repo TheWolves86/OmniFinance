@@ -5,7 +5,7 @@ import { getTotalBalance, getMonthlyIncome, getMonthlyExpense } from "@/src/db/r
 import type { Transaction } from "@/src/types/models";
 
 type DashboardGoal = { savedAmount: number };
-type DashboardBudget = { limit: number };
+type DashboardBudget = { amount: number };
 
 export type DashboardData = {
     totalBalance: number;
@@ -40,7 +40,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         );
 
         const totalBudget = budgets.reduce(
-            (sum: number, budget: DashboardBudget) => sum + budget.limit,
+            (sum: number, budget: DashboardBudget) => sum + budget.amount,
             0
         )
 

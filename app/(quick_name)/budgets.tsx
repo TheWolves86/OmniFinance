@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 
 import {
   deleteBudget,
@@ -42,6 +43,7 @@ type Budget = {
 };
 
 export default function BudgetsPage() {
+  const router = useRouter();
   const [budgets, setBudgets] =
     useState<Budget[]>([]);
 
@@ -246,9 +248,23 @@ export default function BudgetsPage() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.heading}>
-              Budgets
-            </Text>
+            <View style={styles.titleRow}>
+              <Pressable
+                onPress={() => router.back()}
+                hitSlop={10}
+                style={styles.backButton}
+              >
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color="#0B1D3A"
+                />
+              </Pressable>
+
+              <Text style={styles.heading}>
+                Budgets
+              </Text>
+            </View>
 
             <Text style={styles.subtitle}>
               Keep your spending on track.
@@ -333,6 +349,16 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 8,
     paddingBottom: 14,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  backButton: {
+    marginRight: 10,
+    paddingVertical: 2,
   },
 
   heading: {
@@ -508,3 +534,4 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 });
+//ah vastegonna huiyaa

@@ -28,6 +28,7 @@ import {
 
 import {
   createBudget,
+  getBudgetByCategoryAndMonth,
   updateBudget,
 } from "@/src/db/repository/budget";
 
@@ -153,6 +154,27 @@ const BudgetsBottomSheet = forwardRef<BottomSheetModal>(
 
       try {
         const currentMonth = getCurrentMonth();
+        const targetMonth =
+          payload.mode === "edit" &&
+          payload.budget?.month
+            ? payload.budget.month
+            : currentMonth;
+
+        const duplicateBudget = await getBudgetByCategoryAndMonth(
+          selectedCategory,
+          targetMonth,
+          payload.mode === "edit"
+            ? payload.budget?.id
+            : undefined
+        );
+
+        if (duplicateBudget && payload.mode !== "edit") {
+          Alert.alert(
+            "Budget already exists",
+            `A budget for this category already exists for ${targetMonth}.`
+          );
+          return;
+        }
 
         if (
           payload.mode === "edit" &&
@@ -161,14 +183,13 @@ const BudgetsBottomSheet = forwardRef<BottomSheetModal>(
           await updateBudget(payload.budget.id, {
             categoryId: selectedCategory,
             amount: numericAmount,
-            month:
-              payload.budget.month ?? currentMonth,
+            month: targetMonth,
           });
         } else {
           await createBudget({
             categoryId: selectedCategory,
             amount: numericAmount,
-            month: currentMonth,
+            month: targetMonth,
           });
         }
 
@@ -178,9 +199,16 @@ const BudgetsBottomSheet = forwardRef<BottomSheetModal>(
       } catch (error) {
         console.error("Error saving budget:", error);
 
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
         Alert.alert(
           "Could not save budget",
-          "A budget for this category may already exist this month."
+          errorMessage.includes("UNIQUE") || errorMessage.includes("already exists")
+            ? `A budget for this category already exists for this month.`
+            : "Please check the details and try again."
         );
       }
     }
