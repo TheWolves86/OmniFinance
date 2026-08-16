@@ -534,4 +534,4 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 });
-//ah vastegonna huiyaa
+//

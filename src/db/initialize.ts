@@ -93,6 +93,7 @@ export async function initializeDatabase(): Promise<void> {
       id TEXT PRIMARY KEY NOT NULL,
       provider TEXT NOT NULL,
       policy_name TEXT NOT NULL,
+      policy_type TEXT NOT NULL,
       policy_number TEXT,
       premium INTEGER NOT NULL,
       renewal_date INTEGER NOT NULL,
@@ -219,6 +220,11 @@ export async function initializeDatabase(): Promise<void> {
   const billColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(bills)");
   if (!billColumns.some((column) => column.name === "paid_at")) {
     await db.execAsync("ALTER TABLE bills ADD COLUMN paid_at INTEGER");
+  }
+
+  const insuranceColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(insurance)");
+  if (!insuranceColumns.some((column) => column.name === "policy_type")) {
+    await db.execAsync("ALTER TABLE insurance ADD COLUMN policy_type TEXT NOT NULL DEFAULT ''");
   }
 
   initialized = true;
