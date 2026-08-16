@@ -77,8 +77,7 @@ export default function BudgetsPage() {
       setBudgets(budgetsWithSpent);
     } catch (error) {
       console.error(
-        "Error loading budgets:",
-        error
+        "Error loading budgets: " + String(error)
       );
     }
   }, [currentMonth]);
@@ -126,7 +125,7 @@ export default function BudgetsPage() {
               await deleteBudget(budget.id);
               await loadBudgets();
             } catch (error) {
-              console.error(error);
+              console.error(String(error));
             }
           },
         },
