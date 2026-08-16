@@ -12,7 +12,7 @@ export async function getTotalBalance() {
 
         return row?.total ?? 0;
     } catch (error) {
-        throw new Error(`Unable to get total balance: ${error}`);
+        throw new Error(`Unable to get total balance: ${String(error)}`);
     }
 }
 

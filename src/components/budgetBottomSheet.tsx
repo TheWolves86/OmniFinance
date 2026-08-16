@@ -97,8 +97,7 @@ const BudgetsBottomSheet = forwardRef<BottomSheetModal>(
             setCategories(data ?? []);
           } catch (error) {
             console.error(
-              "Error loading budget categories:",
-              error
+              "Error loading budget categories: " + String(error)
             );
           }
 
@@ -197,7 +196,7 @@ const BudgetsBottomSheet = forwardRef<BottomSheetModal>(
         resetForm();
         dismissBudgetsSheet();
       } catch (error) {
-        console.error("Error saving budget:", error);
+        console.error("Error saving budget: " + String(error));
 
         const errorMessage =
           error instanceof Error
