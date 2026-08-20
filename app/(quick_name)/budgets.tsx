@@ -31,6 +31,7 @@ import {
 } from "@/src/components/budgetSheetController";
 
 import BudgetsBottomSheet from "@/src/components/budgetBottomSheet";
+import { subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
 
 type Budget = {
   id: string;
@@ -82,6 +83,8 @@ export default function BudgetsPage() {
       );
     }
   }, [currentMonth]);
+
+  useEffect(() => subscribeTransactionRefresh(() => { void loadBudgets(); }), [loadBudgets]);
 
   useEffect(() => {
     loadBudgets();

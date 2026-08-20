@@ -10,10 +10,7 @@
       "supportsTablet": true
     },
     "android": {
-      "permissions": [
-        "READ_SMS",
-        "RECEIVE_SMS"
-      ],
+      "package": "com.omnifinance.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -30,7 +27,8 @@
       "expo-sqlite",
       "expo-secure-store",
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      "./plugins/withNotificationListener"
     ]
   }
 }

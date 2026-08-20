@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import { initializeDatabase } from "@/src/db/initialize";
 import { seedDatabase } from "@/src/db/seed";
 import AccountBottomSheet from "@/src/components/accountBottomSheet";
+import { drainNativeCaptureQueue } from "@/src/capture/nativeQueue";
+import * as Linking from "expo-linking";
+import { captureShortcutPayload } from "@/src/capture/pipeline";
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -20,6 +23,7 @@ export default function RootLayout() {
       try {
         await initializeDatabase();
         await seedDatabase();
+        await drainNativeCaptureQueue();
         if (mounted) setReady(true);
       } catch (cause) {
         if (mounted) setError(cause instanceof Error ? cause : new Error(String(cause)));
@@ -27,6 +31,19 @@ export default function RootLayout() {
     })();
     return () => { mounted = false; };
   }, [retryCount]);
+  useEffect(() => {
+    if (!ready) return;
+    const handleUrl = async (url: string) => {
+      const parsed = Linking.parse(url);
+      if (parsed.path !== "capture") return;
+      const query = parsed.queryParams ?? {};
+      const value = (key: string) => { const item = query[key]; return Array.isArray(item) ? item[0] : item; };
+      await captureShortcutPayload({ source: value("source") || "ios_shortcut", rawText: value("rawText") || "", merchant: value("merchant") || undefined, amount: Number(value("amount")), type: value("type"), transactionDate: Number(value("transactionDate")) || Date.now(), referenceId: value("referenceId") || undefined, note: value("note") || undefined });
+    };
+    const subscription = Linking.addEventListener("url", ({ url }) => { void handleUrl(url); });
+    void Linking.getInitialURL().then((url) => { if (url) return handleUrl(url); });
+    return () => subscription.remove();
+  }, [ready]);
   if (error) return (
     <View style={styles.errorContainer}>
       <Text style={styles.errorTitle}>OmniFinance could not start</Text>

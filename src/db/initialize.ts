@@ -41,6 +41,9 @@ export async function initializeDatabase(): Promise<void> {
       payment_method TEXT,
       receipt_image TEXT,
       tags TEXT,
+      capture_source TEXT,
+      capture_reference_id TEXT,
+      detected_transaction_id TEXT,
       transaction_date INTEGER NOT NULL,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
@@ -147,6 +150,31 @@ export async function initializeDatabase(): Promise<void> {
       biometric_enabled INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS detected_transactions (
+      id TEXT PRIMARY KEY NOT NULL,
+      source TEXT NOT NULL,
+      source_package TEXT,
+      source_app TEXT,
+      raw_text TEXT NOT NULL,
+      merchant TEXT,
+      amount REAL NOT NULL,
+      type TEXT NOT NULL,
+      transaction_date INTEGER NOT NULL,
+      account_id TEXT,
+      transfer_to_account_id TEXT,
+      category_id TEXT,
+      reference_id TEXT,
+      account_hint TEXT,
+      upi_handle TEXT,
+      parser TEXT,
+      parser_version TEXT,
+      confidence REAL NOT NULL,
+      status TEXT NOT NULL,
+      duplicate_of TEXT,
+      note TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
 
     CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(transaction_date);
     CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
@@ -158,7 +186,17 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(status);
     CREATE INDEX IF NOT EXISTS idx_recurring_next_run ON recurring_transactions(next_run);
     CREATE INDEX IF NOT EXISTS idx_budgets_month ON budgets(month);
+    CREATE INDEX IF NOT EXISTS idx_detected_status ON detected_transactions(status);
+    CREATE INDEX IF NOT EXISTS idx_detected_reference ON detected_transactions(reference_id);
+    CREATE INDEX IF NOT EXISTS idx_detected_fingerprint ON detected_transactions(amount, type, transaction_date);
   `);
+
+  const transactionColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(transactions)");
+  for (const column of ["capture_source", "capture_reference_id", "detected_transaction_id"]) {
+    if (!transactionColumns.some((item) => item.name === column)) await db.execAsync(`ALTER TABLE transactions ADD COLUMN ${column} TEXT`);
+  }
+  const detectedColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(detected_transactions)");
+  if (!detectedColumns.some((item) => item.name === "transfer_to_account_id")) await db.execAsync("ALTER TABLE detected_transactions ADD COLUMN transfer_to_account_id TEXT");
 
   const budgetColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(budgets)");
   const hasBudgetAmount = budgetColumns.some((column) => column.name === "amount");

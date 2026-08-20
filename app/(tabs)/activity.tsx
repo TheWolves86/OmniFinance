@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, StyleSheet, Pressable, TextInput, SectionList } from "react-native";
+import { View, Text, StyleSheet, Pressable, TextInput, SectionList, Alert } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllTransaction } from "@/src/db/repository/transaction";
 import React, { useCallback, useEffect, useState } from "react";
@@ -8,6 +8,15 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import TransactionDetailsSheet from "@/src/components/transactionDetailsSheet";
 import { presentTransactionSheet, subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
 import type { Transaction, TransactionSection } from "@/src/types/models";
+import type { DetectedTransaction } from "@/src/types/models";
+import { getDetectedTransactions } from "@/src/db/repository/detectedTransaction";
+import { approveDetectedTransaction, setDetectedStatus } from "@/src/services/detectedTransactionService";
+import { useRouter } from "expo-router";
+import DetectedTransactionReview from "@/src/components/detectedTransactionReview";
+
+function DetectedCard({ item, onReview, onRefresh }: { item: DetectedTransaction; onReview: (item: DetectedTransaction) => void; onRefresh: () => void }) {
+  return <View style={styles.detectedCard}><View style={styles.detectedRow}><View style={styles.detectedInfo}><Text style={styles.detectedMerchant}>{item.merchant || "Payment detected"}</Text><Text style={styles.detectedMeta}>{item.sourceApp || item.source} · {item.categoryName || (item.type === "transfer" ? "Transfer needs review" : "Category needed")}</Text><Text style={styles.detectedMeta}>{new Date(item.transactionDate).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</Text></View><Text style={[styles.detectedAmount, { color: item.type === "income" ? "#0F9D58" : "#EF4444" }]}>{item.type === "income" ? "+" : "-"}₹{Number(item.amount).toLocaleString("en-IN")}</Text></View><View style={styles.detectedActions}><Pressable style={[styles.detectedButton, styles.approveButton]} onPress={() => onReview(item)}><Text style={styles.approveText}>Review / approve</Text></Pressable><Pressable style={styles.detectedButton} onPress={() => void setDetectedStatus(item.id, "paused").then(onRefresh)}><Text style={styles.actionText}>Pause</Text></Pressable><Pressable style={styles.detectedButton} onPress={() => Alert.alert("Delete detected transaction?", "It will not affect your ledger.", [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: () => void setDetectedStatus(item.id, "deleted").then(onRefresh) }])}><Text style={styles.deleteText}>Delete</Text></Pressable></View></View>;
+}
 
 //main screen showing all transactions
 export default function ActivityPage() {
@@ -15,12 +24,21 @@ export default function ActivityPage() {
   const [search, setSearch] = useState("");
   const detailsSheetRef = React.useRef<BottomSheetModal>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [detected, setDetected] = useState<DetectedTransaction[]>([]);
+  const [paused, setPaused] = useState<DetectedTransaction[]>([]);
+  const [reviewingDetected, setReviewingDetected] = useState<DetectedTransaction | null>(null);
+  const router = useRouter();
 
   //load every transaction from the database
   const loadTransactions = useCallback(async () => {
     try {
       const data = await getAllTransaction();
       setTransactions(data ?? []);
+      const pending = await getDetectedTransactions("detected");
+      const possibleDuplicates = await getDetectedTransactions("duplicate");
+      const pausedItems = await getDetectedTransactions("paused");
+      setDetected(([...(pending ?? []), ...(possibleDuplicates ?? [])]) as DetectedTransaction[]);
+      setPaused((pausedItems ?? []) as DetectedTransaction[]);
     } catch (error) {
       console.error("Error: " + String(error));
     }
@@ -117,7 +135,7 @@ export default function ActivityPage() {
                 </View>
                 <Text style={styles.brandText}>OmniFinance</Text>
               </View>
-              <Pressable style={styles.notificationButton}>
+              <Pressable style={styles.notificationButton} onPress={() => router.push("/(quick_name)/capture") }>
                 <Ionicons name="notifications-outline" size={20} color="#0B1D3A" />
               </Pressable>
             </View>
@@ -140,6 +158,8 @@ export default function ActivityPage() {
                 <Ionicons name="options-outline" size={18} color="#0B1D3A" />
               </Pressable>
             </View>
+            {detected.length > 0 && <View style={styles.detectedSection}><View style={styles.detectedHeader}><View><Text style={styles.detectedTitle}>Detected Transactions</Text><Text style={styles.detectedSubtitle}>Review before adding to your ledger</Text></View><Text style={styles.detectedCount}>{detected.length}</Text></View>{detected.map((item) => <DetectedCard key={item.id} item={item} onReview={setReviewingDetected} onRefresh={loadTransactions} />)}</View>}
+            {paused.length > 0 && <View style={styles.pausedSection}><Text style={styles.detectedTitle}>Paused ({paused.length})</Text><Text style={styles.detectedSubtitle}>Paused items remain available until you decide</Text>{paused.map((item) => <DetectedCard key={item.id} item={item} onReview={setReviewingDetected} onRefresh={loadTransactions} />)}</View>}
           </View>
         }
         // show this when there are no transactions
@@ -195,6 +215,7 @@ export default function ActivityPage() {
           }
         }}
       />
+      <DetectedTransactionReview transaction={reviewingDetected} onClose={() => setReviewingDetected(null)} onChanged={loadTransactions} />
     </SafeAreaView>
   );
 }
@@ -325,5 +346,23 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontSize: 14
   }
+  ,detectedSection:{marginTop:18,padding:14,borderRadius:18,backgroundColor:"#FFF8E1",borderWidth:1,borderColor:"#F2D77B"}
+  ,pausedSection:{marginTop:18,padding:14,borderRadius:18,backgroundColor:"#F1F3F6",borderWidth:1,borderColor:"#E2E5EA"}
+  ,detectedHeader:{flexDirection:"row",justifyContent:"space-between",alignItems:"flex-start"}
+  ,detectedTitle:{fontSize:16,fontWeight:"800",color:"#0B1D3A"}
+  ,detectedSubtitle:{marginTop:3,fontSize:11,color:"#8A6D1D"}
+  ,detectedCount:{fontSize:18,fontWeight:"800",color:"#8A6D1D"}
+  ,detectedCard:{marginTop:12,padding:12,borderRadius:14,backgroundColor:"#FFF",borderWidth:1,borderColor:"#F0E3AD"}
+  ,detectedRow:{flexDirection:"row",justifyContent:"space-between"}
+  ,detectedInfo:{flex:1,marginRight:8}
+  ,detectedMerchant:{fontSize:14,fontWeight:"800",color:"#0B1D3A"}
+  ,detectedMeta:{marginTop:3,fontSize:10,color:"#6B7280"}
+  ,detectedAmount:{fontSize:14,fontWeight:"800"}
+  ,detectedActions:{flexDirection:"row",gap:7,marginTop:10}
+  ,detectedButton:{paddingHorizontal:11,paddingVertical:8,borderRadius:9,backgroundColor:"#F1F3F6"}
+  ,approveButton:{backgroundColor:"#0B1D3A"}
+  ,approveText:{fontSize:11,fontWeight:"700",color:"#FFF"}
+  ,actionText:{fontSize:11,fontWeight:"700",color:"#0B1D3A"}
+  ,deleteText:{fontSize:11,fontWeight:"700",color:"#B42318"}
 });
 //

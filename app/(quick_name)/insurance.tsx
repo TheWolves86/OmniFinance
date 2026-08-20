@@ -114,16 +114,20 @@ export default function InsurancePage() {
   }) => {
     return (
       <Pressable
-        style={styles.policyCard}
+        style={({ pressed }) => [
+          styles.policyCard,
+          pressed && styles.policyCardPressed,
+        ]}
         onPress={() =>
           presentInsuranceSheet({
             mode: "edit",
             insurance: item,
           })
         }
-        onLongPress={() =>
-          handleDelete(item)
-        }
+        onLongPress={() => handleDelete(item)}
+        android_ripple={{ color: "#EEF1F5" }}
+        accessibilityRole="button"
+        accessibilityLabel={`Edit ${item.providerName} ${item.policyName}`}
       >
         <View style={styles.policyIcon}>
           <Ionicons
@@ -203,15 +207,13 @@ export default function InsurancePage() {
                 Insurance
               </Text>
 
-              <Pressable
-                style={styles.moreButton}
-              >
+              <View style={styles.moreButton}>
                 <Ionicons
                   name="ellipsis-vertical"
                   size={18}
                   color="#0B1D3A"
                 />
-              </Pressable>
+              </View>
             </View>
 
             <Text style={styles.heading}>
@@ -221,7 +223,10 @@ export default function InsurancePage() {
         }
         ListFooterComponent={
           <Pressable
-            style={styles.addPolicyButton}
+            style={({ pressed }) => [
+              styles.addPolicyButton,
+              pressed && styles.addPolicyButtonPressed,
+            ]}
             onPress={() =>
               presentInsuranceSheet({
                 mode: "create",
@@ -320,19 +325,23 @@ const styles = StyleSheet.create({
   policyCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    marginBottom: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 15,
+    marginBottom: 8,
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#ECEEF2",
   },
 
+  policyCardPressed: {
+    backgroundColor: "#F1F4F8",
+  },
+
   policyIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: "#F1F3F6",
     justifyContent: "center",
     alignItems: "center",
@@ -345,14 +354,14 @@ const styles = StyleSheet.create({
   },
 
   providerName: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
     color: "#0B1D3A",
   },
 
   policyMeta: {
-    marginTop: 2,
-    fontSize: 9,
+    marginTop: 5,
+    fontSize: 11,
     color: "#7B8190",
   },
 
@@ -362,32 +371,36 @@ const styles = StyleSheet.create({
   },
 
   premiumAmount: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
     color: "#0B1D3A",
   },
 
   premiumLabel: {
-    marginTop: 1,
-    fontSize: 8,
+    marginTop: 3,
+    fontSize: 10,
     color: "#8A93A6",
   },
 
   addPolicyButton: {
-    marginTop: 1,
+    marginTop: 4,
     backgroundColor: "#FFFFFF",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    minHeight: 43,
-    paddingHorizontal: 10,
+    minHeight: 56,
+    paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
   },
 
+  addPolicyButtonPressed: {
+    backgroundColor: "#F1F4F8",
+  },
+
   plusCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#F1F3F6",
     justifyContent: "center",
     alignItems: "center",

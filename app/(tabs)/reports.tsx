@@ -8,6 +8,7 @@ import React, {
 import {
   FlatList,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { db } from "@/src/db";
+import { subscribeTransactionRefresh } from "@/src/components/transactionSheetController";
 
 type ReportRange = "today" | "month" | "year" | "3m";
 
@@ -135,11 +137,8 @@ function getRangeStart(range: ReportRange) {
     ).getTime();
   }
 
-  const start = new Date(
-    now.getFullYear(),
-    now.getMonth() - 2,
-    1
-  );
+  const start = new Date(now);
+  start.setMonth(start.getMonth() - 3);
 
   return start.getTime();
 }
@@ -304,72 +303,38 @@ export default function ReportsPage() {
         categoryMap.values()
       ).sort((a, b) => b.amount - a.amount);
 
-      // Create a 6-month trend for the report chart.
+      // Keep the chart aligned with the selected report period.
       const monthlyTrend: MonthlyTrend[] = [];
 
       const today = new Date();
-
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date(
-          today.getFullYear(),
-          today.getMonth() - i,
-          1
-        );
-
-        const key = getMonthKey(date);
-
-        const monthTransactions =
-          await db.getAllAsync<{
-            amount: number;
-            type: string;
-          }>(
-            `SELECT amount, type
-             FROM transactions
-             WHERE transaction_date >= ?
-               AND transaction_date < ?`,
-            date.getTime(),
-            new Date(
-              date.getFullYear(),
-              date.getMonth() + 1,
-              1
-            ).getTime()
+      const trendDates = range === "today"
+        ? [today]
+        : Array.from({ length: range === "year" ? 12 : 3 }, (_, index) =>
+            new Date(today.getFullYear(), today.getMonth() - (range === "year" ? 11 - index : 2 - index), 1)
           );
 
-        const monthIncome =
-          monthTransactions
-            .filter(
-              (transaction) =>
-                transaction.type === "income"
-            )
-            .reduce(
-              (sum, transaction) =>
-                sum +
-                Number(transaction.amount || 0),
-              0
-            );
-
-        const monthExpense =
-          monthTransactions
-            .filter(
-              (transaction) =>
-                transaction.type === "expense"
-            )
-            .reduce(
-              (sum, transaction) =>
-                sum +
-                Number(transaction.amount || 0),
-              0
-            );
+      trendDates.forEach((date) => {
+        const startOfBucket = range === "today"
+          ? new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+          : new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+        const endOfBucket = range === "today"
+          ? startOfBucket + 24 * 60 * 60 * 1000
+          : new Date(date.getFullYear(), date.getMonth() + 1, 1).getTime();
+        const bucketTransactions = transactions.filter((transaction) =>
+          transaction.transactionDate >= startOfBucket && transaction.transactionDate < endOfBucket
+        );
+        const bucketIncome = bucketTransactions.filter((transaction) => transaction.type === "income")
+          .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+        const bucketExpense = bucketTransactions.filter((transaction) => transaction.type === "expense")
+          .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
 
         monthlyTrend.push({
-          label: monthLabel(date),
-          income: monthIncome,
-          expense: monthExpense,
-          net: monthIncome - monthExpense,
+          label: range === "today" ? "Today" : monthLabel(date),
+          income: bucketIncome,
+          expense: bucketExpense,
+          net: bucketIncome - bucketExpense,
         });
-
-        void key;
-      }
+      });
 
       // Current month's budgets.
       const currentMonth =
@@ -646,6 +611,8 @@ export default function ReportsPage() {
     loadReports();
   }, [loadReports]);
 
+  useEffect(() => subscribeTransactionRefresh(() => { void loadReports(); }), [loadReports]);
+
   useEffect(() => {
     const refresh = () => {
       loadReports();
@@ -737,9 +704,13 @@ export default function ReportsPage() {
   return (
     <SafeAreaView
       style={styles.container}
+      edges={["top"]}
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={loadReports} tintColor="#0B1D3A" />
+        }
         contentContainerStyle={
           styles.scrollContent
         }
@@ -1545,7 +1516,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
 
   header: {
@@ -2029,4 +2000,4 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
 });
-//hi bro wspp
+// 
