@@ -1,4 +1,94 @@
 ## JULES REVIEW REPORT
+Date: 2026-08-20
+Project: OmniFinance
+Files Reviewed: 2
+
+---
+
+### 🔴 CRITICAL SECURITY ISSUES (0)
+None found this session.
+
+---
+
+### 🟠 BUGS & ERROR HANDLING (2)
+File: src/services/transactionService.ts
+Line: 17, 26, 40
+Issue: `withExclusiveTransactionAsync` callbacks were receiving a `tx` parameter and passing it to internal calls.
+Why it's dangerous: With `expo-sqlite` SDK 50+, `withTransactionAsync` and `withExclusiveTransactionAsync` do not pass a `tx` parameter. Database calls inside the callback must use the main `db` instance and automatically execute within the transaction context. Passing a parameter intercepts the context and can cause transactions to fail silently or corrupt data.
+Fix:
+```javascript
+<<<<<<< SEARCH
+export async function addTransactionInTransaction(data:AddTransactionData, tx:any) {
+  const account = await getAccountById(data.accountId, tx);
+  if (!account) throw new Error("Account not found");
+  await createTransaction(data, tx);
+  await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount), tx);
+}
+export async function addTransaction(data:AddTransactionData) {
+  try {
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      await addTransactionInTransaction(data, tx);
+    });
+  } catch (error) {
+=======
+export async function addTransactionInTransaction(data:AddTransactionData) {
+  const account = await getAccountById(data.accountId);
+  if (!account) throw new Error("Account not found");
+  await createTransaction(data);
+  await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount));
+}
+export async function addTransaction(data:AddTransactionData) {
+  try {
+    await db.withExclusiveTransactionAsync(async () => {
+      await addTransactionInTransaction(data);
+    });
+  } catch (error) {
+>>>>>>> REPLACE
+```
+*(Applied symmetrically across all functions in the file)*
+
+File: src/services/detectedTransactionService.ts
+Line: 18
+Issue: `withExclusiveTransactionAsync` callback was receiving a `tx` parameter.
+Why it's dangerous: Same as above.
+Fix:
+```javascript
+<<<<<<< SEARCH
+export async function approveDetectedTransaction(id: string) {
+  await db.withExclusiveTransactionAsync(async (tx) => {
+    const detected = await getDetectedById(id, tx) as DetectedTransaction | null;
+=======
+export async function approveDetectedTransaction(id: string) {
+  await db.withExclusiveTransactionAsync(async () => {
+    const detected = await getDetectedById(id) as DetectedTransaction | null;
+>>>>>>> REPLACE
+```
+*(Applied to all nested calls within the callback block)*
+
+---
+
+### 🟡 PERFORMANCE ISSUES (0)
+None found this session.
+
+---
+
+### 🔵 CODE QUALITY (0)
+None found this session.
+
+---
+
+### ✅ FIXES APPLIED
+- `src/services/transactionService.ts`
+- `src/services/detectedTransactionService.ts`
+
+---
+
+### 📋 WHAT TO WATCH NEXT SESSION
+- Monitor if any newly created services are erroneously attempting to pass a transaction connection (`tx` / `txn`) into the query callbacks.
+- Track `console.error` logs to catch cases where they might be passing unsanitized error objects out of bounds.
+
+
+## JULES REVIEW REPORT
 Date: 2024-05-24
 Project: OmniFinance
 Files Reviewed: 20
