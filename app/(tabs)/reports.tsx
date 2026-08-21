@@ -599,8 +599,7 @@ export default function ReportsPage() {
       });
     } catch (error) {
       console.error(
-        "Error loading reports:",
-        error
+        "Error loading reports: " + String(error)
       );
     } finally {
       setLoading(false);
