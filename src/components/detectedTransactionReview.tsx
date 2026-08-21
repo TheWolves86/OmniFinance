@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Account, Category, DetectedTransaction, DetectedTransactionType } from "@/src/types/models";
 import { getAllAccounts } from "@/src/db/repository/account";
@@ -42,13 +42,17 @@ export default function DetectedTransactionReview({ transaction, onClose, onChan
   const save = async (approve: boolean) => {
     const parsedAmount = Number(amount.replace(/,/g, ""));
     const parsedDate = new Date(`${dateText}T12:00:00`).getTime();
-    if (!merchant.trim() || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || !Number.isFinite(parsedDate)) return;
+    if (!merchant.trim()) { Alert.alert("Merchant required", "Add a merchant or title before saving."); return; }
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) { Alert.alert("Invalid amount", "Enter an amount greater than zero."); return; }
+    if (!Number.isFinite(parsedDate)) { Alert.alert("Invalid date", "Enter a valid date as YYYY-MM-DD."); return; }
     setSaving(true);
     try {
       await editDetectedTransaction(transaction.id, { merchant: merchant.trim(), amount: parsedAmount, type, accountId, transferToAccountId, categoryId: type === "transfer" ? null : categoryId, transactionDate: parsedDate, note: note.trim() || null });
       if (approve) await approveDetectedTransaction(transaction.id);
       onChanged();
       onClose();
+    } catch (error) {
+      Alert.alert(approve ? "Could not approve" : "Could not save changes", String(error));
     } finally {
       setSaving(false);
     }

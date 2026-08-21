@@ -45,7 +45,7 @@ export type TransactionSection = {
   order: number;
 };
 
-export type DetectedTransactionStatus = "detected" | "paused" | "approved" | "deleted" | "duplicate";
+export type DetectedTransactionStatus = "pending" | "paused" | "approved" | "deleted" | "duplicate";
 
 export type DetectedTransaction = {
   id: string;

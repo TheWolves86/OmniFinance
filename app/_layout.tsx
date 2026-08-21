@@ -9,9 +9,14 @@ import { seedDatabase } from "@/src/db/seed";
 import AccountBottomSheet from "@/src/components/accountBottomSheet";
 import { drainNativeCaptureQueue } from "@/src/capture/nativeQueue";
 import * as Linking from "expo-linking";
+import * as Notifications from "expo-notifications";
 import { captureShortcutPayload } from "@/src/capture/pipeline";
+import { configureNotifications } from "@/src/services/notificationService";
+import { refreshScheduledFinancialNotifications } from "@/src/services/notificationScheduler";
+import { useRouter } from "expo-router";
 
 export default function RootLayout() {
+  const router = useRouter();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -24,6 +29,12 @@ export default function RootLayout() {
         await initializeDatabase();
         await seedDatabase();
         await drainNativeCaptureQueue();
+        try {
+          await configureNotifications();
+          await refreshScheduledFinancialNotifications();
+        } catch (notificationError) {
+          console.warn("Notifications unavailable; continuing without them.", String(notificationError));
+        }
         if (mounted) setReady(true);
       } catch (cause) {
         if (mounted) setError(cause instanceof Error ? cause : new Error(String(cause)));
@@ -31,6 +42,20 @@ export default function RootLayout() {
     })();
     return () => { mounted = false; };
   }, [retryCount]);
+  useEffect(() => {
+    if (!ready) return;
+    const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+      const data = response.notification.request.content.data as { route?: string; params?: string };
+      if (data.route) {
+        let params: Record<string, string> | undefined;
+        try { params = data.params ? JSON.parse(data.params) : undefined; } catch { params = undefined; }
+        router.push({ pathname: data.route as any, params });
+      }
+    };
+    const subscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+    void Notifications.getLastNotificationResponseAsync().then((response) => { if (response) handleNotificationResponse(response); });
+    return () => subscription.remove();
+  }, [ready, router]);
   useEffect(() => {
     if (!ready) return;
     const handleUrl = async (url: string) => {

@@ -47,7 +47,7 @@ const Dashboard = () => {
             </View>
             <Text style={styles.brandText}>OmniFinance</Text>
           </View>
-          <Pressable style={styles.notificationButton}>
+          <Pressable style={styles.notificationButton} onPress={() => router.push('/notifications')}>
             <Ionicons name="notifications-outline" size={20} color="#0B1D3A" />
           </Pressable>
         </View>
@@ -98,6 +98,10 @@ const Dashboard = () => {
           <Text style={styles.statSubtext}>This Month</Text>
         </View>
       </View>
+      <Pressable style={{ marginTop: 22, backgroundColor: "#EEF2F8", borderRadius: 16, padding: 16 }} onPress={() => router.push('/ai-coach')}>
+        <Text style={{ color: "#0B1D3A", fontWeight: "800", fontSize: 16 }}>Open AI Coach</Text>
+        <Text style={{ color: "#6B7280", marginTop: 4 }}>Ask about your real OmniFinance data</Text>
+      </Pressable>
       <Pressable onPress={() => router.push('/accounts')}>
         <Text>Go to accounts</Text>
       </Pressable>

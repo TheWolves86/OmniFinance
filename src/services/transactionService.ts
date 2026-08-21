@@ -6,16 +6,18 @@ export type AddTransactionData = TransactionInput;
 const balanceAfter = (balance:number, type:string, amount:number) => balance + (type === "income" ? amount : -amount);
 const reverseBalance = (balance:number, type:string, amount:number) => balance + (type === "income" ? -amount : amount);
 
-export async function addTransactionInTransaction(data:AddTransactionData) {
-  const account = await getAccountById(data.accountId);
+export async function addTransactionInTransaction(data:AddTransactionData, tx:any = db) {
+  const account = await getAccountById(data.accountId, tx);
   if (!account) throw new Error("Account not found");
-  await createTransaction(data);
-  await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount));
+  if (!Number.isFinite(data.amount) || data.amount <= 0) throw new Error("Amount must be greater than zero");
+  if (data.type !== "income" && data.type !== "expense") throw new Error("Invalid transaction type");
+  await createTransaction(data, tx);
+  await updateBalance(account.id, balanceAfter(account.balance, data.type, data.amount), tx);
 }
 export async function addTransaction(data:AddTransactionData) {
   try {
-    await db.withExclusiveTransactionAsync(async () => {
-      await addTransactionInTransaction(data);
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      await addTransactionInTransaction(data, tx);
     });
   } catch (error) {
     throw new Error(`Unable to add transaction: ${String(error)}`);

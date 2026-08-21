@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, StyleSheet, Pressable, TextInput, SectionList, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, TextInput, SectionList, Alert, ActivityIndicator } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { getAllTransaction } from "@/src/db/repository/transaction";
 import React, { useCallback, useEffect, useState } from "react";
@@ -27,20 +27,27 @@ export default function ActivityPage() {
   const [detected, setDetected] = useState<DetectedTransaction[]>([]);
   const [paused, setPaused] = useState<DetectedTransaction[]>([]);
   const [reviewingDetected, setReviewingDetected] = useState<DetectedTransaction | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const router = useRouter();
 
   //load every transaction from the database
   const loadTransactions = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
       const data = await getAllTransaction();
       setTransactions(data ?? []);
-      const pending = await getDetectedTransactions("detected");
+      const pending = await getDetectedTransactions("pending");
       const possibleDuplicates = await getDetectedTransactions("duplicate");
       const pausedItems = await getDetectedTransactions("paused");
       setDetected(([...(pending ?? []), ...(possibleDuplicates ?? [])]) as DetectedTransaction[]);
       setPaused((pausedItems ?? []) as DetectedTransaction[]);
     } catch (error) {
-      console.error("Error: " + String(error));
+      console.error("Error loading Activity: " + String(error));
+      setLoadError("Unable to load transactions. Pull to retry.");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -135,7 +142,7 @@ export default function ActivityPage() {
                 </View>
                 <Text style={styles.brandText}>OmniFinance</Text>
               </View>
-              <Pressable style={styles.notificationButton} onPress={() => router.push("/(quick_name)/capture") }>
+              <Pressable style={styles.notificationButton} onPress={() => router.push("/notifications") }>
                 <Ionicons name="notifications-outline" size={20} color="#0B1D3A" />
               </Pressable>
             </View>

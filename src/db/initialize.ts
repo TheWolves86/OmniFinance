@@ -175,6 +175,17 @@ export async function initializeDatabase(): Promise<void> {
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS app_notifications (
+      id TEXT PRIMARY KEY NOT NULL,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      is_read INTEGER NOT NULL DEFAULT 0,
+      action_route TEXT,
+      action_params TEXT,
+      dedupe_key TEXT UNIQUE
+    );
 
     CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(transaction_date);
     CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
@@ -189,6 +200,8 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_detected_status ON detected_transactions(status);
     CREATE INDEX IF NOT EXISTS idx_detected_reference ON detected_transactions(reference_id);
     CREATE INDEX IF NOT EXISTS idx_detected_fingerprint ON detected_transactions(amount, type, transaction_date);
+    CREATE INDEX IF NOT EXISTS idx_notifications_created ON app_notifications(created_at);
+    CREATE INDEX IF NOT EXISTS idx_notifications_unread ON app_notifications(is_read);
   `);
 
   const transactionColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(transactions)");
@@ -197,6 +210,9 @@ export async function initializeDatabase(): Promise<void> {
   }
   const detectedColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(detected_transactions)");
   if (!detectedColumns.some((item) => item.name === "transfer_to_account_id")) await db.execAsync("ALTER TABLE detected_transactions ADD COLUMN transfer_to_account_id TEXT");
+  // Older development builds called the reviewable state `detected`. Keep
+  // existing records, but normalize them to the public `pending` state.
+  await db.runAsync("UPDATE detected_transactions SET status='pending' WHERE status='detected'");
 
   const budgetColumns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(budgets)");
   const hasBudgetAmount = budgetColumns.some((column) => column.name === "amount");

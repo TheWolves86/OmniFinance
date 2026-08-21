@@ -4,7 +4,7 @@ import { STORAGE_KEYS } from "../constants/storageKeys";
 
 export async function saveItem(key: string, value: string) {
     try {
-        if (key === STORAGE_KEYS.API_KEY) {
+        if (key === STORAGE_KEYS.API_KEY || key.startsWith("ai_api_key_")) {
             await SecureStore.setItemAsync(key, value);
         } else {
             await AsyncStorage.setItem(key, value);
@@ -17,7 +17,7 @@ export async function saveItem(key: string, value: string) {
 
 export async function getItem(key: string) {
     try {
-        if (key === STORAGE_KEYS.API_KEY) {
+        if (key === STORAGE_KEYS.API_KEY || key.startsWith("ai_api_key_")) {
             return await SecureStore.getItemAsync(key);
         }
         return await AsyncStorage.getItem(key);
@@ -29,7 +29,7 @@ export async function getItem(key: string) {
 
 export async function removeItem(key: string) {
     try {
-        if (key === STORAGE_KEYS.API_KEY) {
+        if (key === STORAGE_KEYS.API_KEY || key.startsWith("ai_api_key_")) {
             await SecureStore.deleteItemAsync(key);
         } else {
             await AsyncStorage.removeItem(key);
