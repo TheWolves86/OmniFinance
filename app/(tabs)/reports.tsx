@@ -707,7 +707,7 @@ export default function ReportsPage() {
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ backgroundColor: "#F8F9FB" }}
+        style={styles.mainContainer}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={loadReports} tintColor="#0B1D3A" />
         }
@@ -1509,6 +1509,9 @@ const REPORT_COLORS = [
 ];
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    backgroundColor: "#F8F9FB",
+  },
   container: {
     flex: 1,
     backgroundColor: "#F8F9FB",

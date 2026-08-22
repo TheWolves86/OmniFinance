@@ -65,7 +65,7 @@ async function gemini(input: ProviderRequest, key: string): Promise<ProviderResp
   return { text: parts.filter((part: any) => part.text).map((part: any) => part.text).join(""), toolCalls: parts.filter((part: any) => part.functionCall).map((part: any, index: number) => ({ id: "gemini-" + index, name: part.functionCall.name, arguments: part.functionCall.args || {} })) };
 }
 export async function getProvider(name: AIProviderName) {
-  const key = await getItem(keyByProvider[name]) || (name === "gemini" ? await getItem(STORAGE_KEYS.API_KEY) : null);
+  const key = await getItem(keyByProvider[name]);
   if (!key) throw new Error("No API key configured for " + name + ". Add one in AI settings.");
   return { name, key };
 }

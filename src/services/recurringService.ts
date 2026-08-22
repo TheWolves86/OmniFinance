@@ -62,6 +62,6 @@ export async function processDueRecurringTransactions() {
       });
     }
   } catch (error) {
-    console.error("Failed to process recurring transactions:", error);
+    console.error("Failed to process recurring transactions: " + String(error));
   }
 }
