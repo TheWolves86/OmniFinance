@@ -4,9 +4,19 @@ const path = require("path");
 
 module.exports = function withNotificationListener(config) {
   config = withAndroidManifest(config, (config) => {
-    const application = config.modResults.manifest.application?.[0];
+    let applicationArray = config.modResults.manifest.application;
+    if (!applicationArray) return config;
+    if (!Array.isArray(applicationArray)) {
+      applicationArray = [applicationArray];
+    }
+    const application = applicationArray[0];
     if (!application) return config;
+    
     application.service = application.service || [];
+    if (!Array.isArray(application.service)) {
+      application.service = [application.service];
+    }
+
     if (!application.service.some((service) => service.$?.["android:name"] === ".capture.OmniFinanceNotificationListener")) {
       application.service.push({ $: { "android:name": ".capture.OmniFinanceNotificationListener", "android:label": "OmniFinance capture", "android:exported": "false", "android:permission": "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" }, "intent-filter": [{ action: [{ $: { "android:name": "android.service.notification.NotificationListenerService" } }] }] });
     }
