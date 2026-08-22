@@ -22,7 +22,7 @@ import { subscribeTransactionRefresh } from "@/src/components/transactionSheetCo
 
 type ReportRange = "today" | "month" | "year" | "3m";
 
-type Transaction = {
+type ReportTransaction = {
   id: string;
   title?: string | null;
   amount: number;
@@ -74,7 +74,7 @@ type ReportData = {
   loanRemaining: number;
   loanCount: number;
 
-  recentTransactions: Transaction[];
+  recentTransactions: ReportTransaction[];
 };
 
 const RANGE_OPTIONS: {
@@ -221,7 +221,7 @@ export default function ReportsPage() {
 
       // Transactions inside the selected period.
       const transactions =
-        await db.getAllAsync<Transaction>(
+        await db.getAllAsync<ReportTransaction>(
           `SELECT
             t.id,
             t.title,

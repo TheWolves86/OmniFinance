@@ -30,6 +30,12 @@
       "@react-native-community/datetimepicker",
       "expo-font",
       "./plugins/withNotificationListener"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7334f3fa-f2ee-4318-bc35-4a29bba3e25b"
+      }
+    }
   }
 }
