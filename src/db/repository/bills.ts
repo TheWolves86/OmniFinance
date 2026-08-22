@@ -56,7 +56,7 @@ export async function getAllBills(tx: any = db) {
 export async function resetBillsDueSoon(tx: any = db) {
   const now = Date.now();
   await tx.runAsync(
-    "UPDATE bills SET is_paid = 0, paid_at = NULL, updated_at = ? WHERE is_paid = 1 AND (dueDate - ?) <= ?",
+    "UPDATE bills SET is_paid = 0, paid_at = NULL, updated_at = ? WHERE is_paid = 1 AND (is_subscription = 1 OR frequency IS NOT NULL) AND (dueDate - ?) <= ?",
     now, now, 10 * 86400000
   );
 }
@@ -76,13 +76,23 @@ export async function deleteBill(id: string, tx: any = db) {
 }
 
 export async function setBillPaid(id: string, paidAt: number, tx: any = db) {
-  const bill = (await tx.getFirstAsync("SELECT dueDate FROM bills WHERE id = ?", id)) as { dueDate: number } | null;
+  const bill = (await tx.getFirstAsync("SELECT dueDate, is_subscription, frequency FROM bills WHERE id = ?", id)) as { dueDate: number, is_subscription: number, frequency: string | null } | null;
   if (!bill) throw new Error("Bill not found");
-  const nextDueDate = nextMonthlyDueDate(bill.dueDate);
-  const result = await tx.runAsync(
-    `UPDATE bills SET is_paid = 1, paid_at = ?, dueDate = ?, updated_at = ?
-     WHERE id = ? AND is_paid = 0`,
-    paidAt, nextDueDate, Date.now(), id
-  );
-  return Boolean(result.changes);
+  
+  if (bill.is_subscription || bill.frequency) {
+    const nextDueDate = nextMonthlyDueDate(bill.dueDate);
+    const result = await tx.runAsync(
+      `UPDATE bills SET is_paid = 1, paid_at = ?, dueDate = ?, updated_at = ?
+       WHERE id = ? AND is_paid = 0`,
+      paidAt, nextDueDate, Date.now(), id
+    );
+    return Boolean(result.changes);
+  } else {
+    const result = await tx.runAsync(
+      `UPDATE bills SET is_paid = 1, paid_at = ?, updated_at = ?
+       WHERE id = ? AND is_paid = 0`,
+      paidAt, Date.now(), id
+    );
+    return Boolean(result.changes);
+  }
 }

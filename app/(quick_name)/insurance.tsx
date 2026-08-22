@@ -323,15 +323,13 @@ const styles = StyleSheet.create({
   },
 
   policyCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F1F4',
     paddingHorizontal: 14,
     paddingVertical: 15,
-    marginBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ECEEF2",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   policyCardPressed: {
@@ -383,7 +381,7 @@ const styles = StyleSheet.create({
   },
 
   addPolicyButton: {
-    marginTop: 4,
+    marginTop: 0,
     backgroundColor: "#FFFFFF",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,

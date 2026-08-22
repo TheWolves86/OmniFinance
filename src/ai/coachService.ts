@@ -19,16 +19,28 @@ function providerFromValue(value: string | null): AIProviderName {
 
 export async function runCoachTurn(history: ChatMessage[]): Promise<CoachTurn> {
   const provider = providerFromValue(await getItem(STORAGE_KEYS.AI_PROVIDER));
-  const first = await sendToProvider(provider, { messages: [{ role: "system", content: COACH_SYSTEM_PROMPT }, ...history.slice(-12)], tools: [...AI_TOOLS] });
-  if (!first.toolCalls.length) return { text: first.text || "I couldn't find enough information to answer that." };
-  const toolMessages: ChatMessage[] = [];
-  for (const call of first.toolCalls) {
-    const executed = await executeAITool(call.name, call.arguments);
-    if (executed.pendingAction) return { text: "I can do that, but I need your confirmation first.", pendingAction: executed.pendingAction };
-    toolMessages.push({ role: "tool", content: JSON.stringify(executed.result), toolCallId: call.id, name: call.name });
+  const currentMessages: ChatMessage[] = [{ role: "system", content: COACH_SYSTEM_PROMPT }, ...history.slice(-12)];
+  
+  for (let loop = 0; loop < 5; loop++) {
+    const response = await sendToProvider(provider, { messages: currentMessages, tools: [...AI_TOOLS] });
+    if (!response.toolCalls || response.toolCalls.length === 0) {
+      return { text: response.text || "I couldn't find enough information to answer that." };
+    }
+
+    const toolMessages: ChatMessage[] = [];
+    for (const call of response.toolCalls) {
+      const executed = await executeAITool(call.name, call.arguments);
+      if (executed.pendingAction) {
+        return { text: response.text || "I can do that, but I need your confirmation first.", pendingAction: executed.pendingAction };
+      }
+      toolMessages.push({ role: "tool", content: typeof executed.result === "string" ? executed.result : JSON.stringify(executed.result), toolCallId: call.id, name: call.name });
+    }
+
+    currentMessages.push({ role: "assistant", content: response.text || "I checked OmniFinance data using tools." });
+    currentMessages.push(...toolMessages);
   }
-  const second = await sendToProvider(provider, { messages: [{ role: "system", content: COACH_SYSTEM_PROMPT }, ...history.slice(-12), { role: "assistant", content: first.text || "I checked OmniFinance data using the requested tools." }, ...toolMessages.map((item) => ({ role: "user" as const, content: "Tool result for " + item.name + ": " + item.content }))], tools: [...AI_TOOLS] });
-  return { text: second.text || "I found the data, but couldn't compose a response." };
+
+  return { text: "I looked up your data using the requested tools, but could not finalize a summary." };
 }
 
 export async function confirmCoachAction(action: PendingAction) {

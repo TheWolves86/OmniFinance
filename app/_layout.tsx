@@ -2,7 +2,7 @@ import { Slot } from "expo-router";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { initializeDatabase } from "@/src/db/initialize";
 import { seedDatabase } from "@/src/db/seed";
@@ -42,6 +42,15 @@ export default function RootLayout() {
     })();
     return () => { mounted = false; };
   }, [retryCount]);
+  useEffect(() => {
+    if (!ready) return;
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        void drainNativeCaptureQueue();
+      }
+    });
+    return () => subscription.remove();
+  }, [ready]);
   useEffect(() => {
     if (!ready) return;
     const handleNotificationResponse = (response: Notifications.NotificationResponse) => {

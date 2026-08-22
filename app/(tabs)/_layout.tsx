@@ -1,12 +1,19 @@
 import { Tabs } from "expo-router";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import CustomTabBar from "@/src/components/customTabBar";
 import AddTransactionSheet from "@/src/components/transactionBottomSheet";
+import { processDueRecurringTransactions } from "@/src/services/recurringService";
+import { refreshScheduledFinancialNotifications } from "@/src/services/notificationScheduler";
 
 export default function TabsLayout() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+  useEffect(() => {
+    processDueRecurringTransactions();
+    refreshScheduledFinancialNotifications();
+  }, []);
 
   return (
     <>

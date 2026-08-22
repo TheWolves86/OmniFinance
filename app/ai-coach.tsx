@@ -1,8 +1,8 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { runCoachTurn, confirmCoachAction } from "@/src/ai/coachService";
 import type { ChatMessage } from "@/src/ai/providers";
 import type { PendingAction } from "@/src/ai/tools";
@@ -12,8 +12,10 @@ const quickPrompts = ["How can I save more?", "Summarize this month", "Where did
 
 export default function AICoachScreen() {
   const router = useRouter();
+  const { initialQuestion } = useLocalSearchParams<{ initialQuestion?: string }>();
   const listRef = useRef<FlatList<Message>>(null);
-  const [messages, setMessages] = useState<Message[]>([{ id: "welcome", role: "assistant", content: "Hi! I’m your OmniFinance Coach. Ask me about your spending, balances, goals, bills, or budgets." }]);
+  const initialProcessed = useRef(false);
+  const [messages, setMessages] = useState<Message[]>([{ id: "welcome", role: "assistant", content: "Hi! I'm your OmniFinance Coach. Ask me about your spending, balances, goals, bills, or budgets." }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,15 @@ export default function AICoachScreen() {
     } catch (cause) { setError(cause instanceof Error ? cause.message : "The AI Coach could not respond."); }
     finally { setLoading(false); setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50); }
   };
+
+  // Auto-send initial question from Dashboard
+  useEffect(() => {
+    if (initialQuestion && !initialProcessed.current) {
+      initialProcessed.current = true;
+      setTimeout(() => void send(initialQuestion), 50);
+    }
+  }, [initialQuestion]);
+
   const confirm = async () => {
     if (!pending) return;
     setLoading(true);

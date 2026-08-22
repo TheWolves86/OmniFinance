@@ -708,6 +708,7 @@ export default function ReportsPage() {
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: "#F8F9FB" }}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={loadReports} tintColor="#0B1D3A" />
         }
@@ -2000,4 +2001,4 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
 });
-//
+//asdflk;j asdfj ;lkj asdf ;lkj asdf lkj asdf lkj asdf ;klj sdf l;kj asdf ;lkj sdf l;kj asdf ;lkj asdf ;lkj asdf ;lkj asdfk ;lkj dfskljfdslkjdsklfjlkdsjflkdsjfdsklfjdlskfj ldkj kl dfjdksfjdsfkldsjfkldsfjkdlsfjdsklfjds;fkl asdf ;jk ADS ;LKJ ads l;kj SAD ;LKJ ads ;lkj ADS ;LJ ads l;kj ASD L;KJ asd lkj ADS ;LKJ ads ;lkj asd ;lkj aDS ;KJ sd lkj ASD L;KJ ads l;kj ADS LKJ sad ;lkj SD L;KJ SAD ;LKJK sd lkj ADS L;KJ ads lkj SAD LKJ ads ;lkj ADS LKJ ads ;lkj asdf lkj dasfkjf sdalkdfskjlfdjkfldalsk;dlk

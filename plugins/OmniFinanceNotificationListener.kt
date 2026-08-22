@@ -8,7 +8,12 @@ import org.json.JSONObject
 import org.json.JSONArray
 
 class OmniFinanceNotificationListener : NotificationListenerService() {
-  private val supported = setOf("com.google.android.apps.walletnfcrel", "com.google.android.apps.nbu.paisa.user", "com.phonepe.app", "net.one97.paytm", "com.samsung.android.spay")
+  private val supported = setOf(
+    "com.google.android.apps.walletnfcrel", "com.google.android.apps.nbu.paisa.user", "com.phonepe.app", "net.one97.paytm", "com.samsung.android.spay",
+    "com.google.android.apps.messaging", "com.samsung.android.messaging", "com.android.mms",
+    "com.snapwork.hdfc", "com.csam.icici.bank.imobile", "com.axis.mobile", "com.sbi.lotusintouch",
+    "in.org.npci.upiapp", "com.dreamplug.androidapp", "com.whatsapp", "in.amazon.mShop.android.shopping", "com.msf.kalyan"
+  )
   override fun onNotificationPosted(sbn: StatusBarNotification) {
     if (!getSharedPreferences("omnifinance_capture", MODE_PRIVATE).getBoolean("capture_enabled", true)) return
     if (!supported.contains(sbn.packageName)) return

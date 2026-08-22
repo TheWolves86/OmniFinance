@@ -11,7 +11,20 @@ export async function refreshScheduledFinancialNotifications() {
   // Rebuild this app's future schedule from current local data so edits,
   // deletions, completed goals, and disabled preferences do not leave stale reminders.
   await Notifications.cancelAllScheduledNotificationsAsync();
-  const [bills, goals, insurance, budgets] = await Promise.all([getAllBills(), getAllGoals(), getAllInsurance(), getAllBudgets()]);
+  const [bills, goals, insurance, budgets, accounts] = await Promise.all([
+    getAllBills(),
+    getAllGoals(),
+    getAllInsurance(),
+    getAllBudgets(),
+    import("@/src/db/repository/account").then((m) => m.getAllAccounts())
+  ]);
+
+  for (const account of accounts as any[]) {
+    if (account.balance < 1000 && account.type !== "loan") {
+      await publishNotification({ category: "accounts", title: "Low Balance Alert", description: `${account.name} balance is below ₹1,000`, actionRoute: "/(tabs)/dashboard", dedupeKey: `low-balance:${account.id}:${new Date().toISOString().slice(0,10)}` }, { notify: false });
+    }
+  }
+
   for (const bill of bills as any[]) {
     const days = Math.ceil((Number(bill.dueDate) - now) / day);
     if (!bill.isPaid && days >= 0 && days <= 7) await publishNotification({ category: "bills", title: String(bill.title) + " bill due in " + days + " day" + (days === 1 ? "" : "s"), description: "₹" + Number(bill.amount).toLocaleString("en-IN"), actionRoute: "/(quick_name)/bills", actionParams: JSON.stringify({ billId: bill.id }), dedupeKey: "bill:" + bill.id + ":" + new Date(bill.dueDate).toISOString().slice(0, 10) }, { notify: true });
