@@ -129,7 +129,7 @@ export default function BudgetsPage() {
               await deleteBudget(budget.id);
               await loadBudgets();
             } catch (error) {
-              console.error(error);
+              console.error("Error: " + String(error));
             }
           },
         },

@@ -183,8 +183,7 @@ const InsuranceBottomSheet = forwardRef<BottomSheetModal>(
         dismissInsuranceSheet();
       } catch (error) {
         console.error(
-          "Error saving insurance:",
-          error
+          "Error saving insurance: " + String(error)
         );
 
         Alert.alert(

@@ -47,8 +47,7 @@ export default function InsurancePage() {
         setPolicies(data ?? []);
       } catch (error) {
         console.error(
-          "Error loading insurance:",
-          error
+          "Error loading insurance: " + String(error)
         );
       }
     },
@@ -99,7 +98,7 @@ export default function InsurancePage() {
               await deleteInsurance(policy.id);
               await loadInsurance();
             } catch (error) {
-              console.error(error);
+              console.error("Error deleting insurance: " + String(error));
             }
           },
         },
